@@ -1,287 +1,427 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-
-<title>ERP System</title>
-
+<title>NGM ERP System</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
 <style>
-
-/* 🌊 BACKGROUND */
-body{
-    min-height:100vh;
-    font-family:'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #e0ecff, #f5f7fb);
-    color:#1e293b;
+:root {
+    --smooth-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 🔷 SIDEBAR */
-.sidebar{
-    width:240px;
-    height:100vh;
-    position:fixed;
-    background:linear-gradient(180deg, #1e3a8a, #2563eb);
-    color:white;
-    padding:25px 15px;
-    box-shadow:4px 0 20px rgba(0,0,0,0.2);
-    display:flex;
-    flex-direction:column;
+/* 🔥 ANTI-FLASH FIX: Disables all transitions for a split second on load 🔥 */
+.preload * {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -ms-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
 }
 
-.sidebar h4{
-    margin-bottom:20px;
-    font-weight:600;
+body { 
+    min-height: 100vh; 
+    font-family: 'Segoe UI', sans-serif; 
+    background: linear-gradient(135deg, #e0ecff, #f5f7fb); 
+    color: #1e293b; 
+    overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
 }
 
-.sidebar a{
-    display:block;
-    color:#e0e7ff;
-    padding:10px 12px;
-    margin-bottom:8px;
-    border-radius:10px;
-    transition:0.3s;
-    text-decoration:none;
+/* --- SIDEBAR STYLES --- */
+.sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    position: fixed; 
+    background: linear-gradient(180deg, #1e3a8a, #2563eb); 
+    color: white; 
+    padding: 25px 15px; 
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15); 
+    display: flex; 
+    flex-direction: column; 
+    z-index: 1000;
+    transition: transform 0.4s var(--smooth-easing), background 0.4s ease; 
 }
 
-.sidebar a:hover{
-    background:rgba(255,255,255,0.2);
-    color:white;
-    transform:translateX(6px);
+.sidebar.collapsed {
+    transform: translateX(-100%);
 }
 
-/* ✅ ACTIVE MENU */
-.sidebar a.active{
-    background:rgba(255,255,255,0.25);
-    color:white;
-    font-weight:600;
+.sidebar-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px; 
+    object-fit: cover;
+    background-color: rgba(255, 255, 255, 0.9); 
+    padding: 3px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-/* 🔻 BOTTOM BUTTONS */
-.sidebar-bottom{
-    margin-top:auto;
+.sidebar h4 { font-weight: 600; font-size: 1.15rem; white-space: nowrap; margin-bottom: 0;}
+
+.sidebar a { 
+    display: block; color: #e0e7ff; padding: 10px 12px; margin-bottom: 8px; 
+    border-radius: 10px; transition: all 0.3s var(--smooth-easing); text-decoration: none; 
+}
+.sidebar a:hover { background: rgba(255,255,255,0.2); color: white; transform: translateX(6px); }
+.sidebar a.active { background: rgba(255,255,255,0.25); color: white; font-weight: 600; }
+
+#studentMenu {
+    max-height: 0; opacity: 0; overflow: hidden; margin-left: 10px;
+    transition: max-height 0.4s var(--smooth-easing), opacity 0.3s ease-in-out, margin 0.3s ease;
+}
+#studentMenu.open { max-height: 150px; opacity: 1; margin-top: 5px; margin-bottom: 5px; }
+#studentMenu a { font-size: 14px; padding: 6px 10px; color: #c7d2fe; margin-bottom: 4px; }
+#studentMenu a:hover { background: rgba(255,255,255,0.15); border-radius: 8px; transform: translateX(4px); }
+
+#arrow { display: inline-block; transition: transform 0.3s var(--smooth-easing); }
+#arrow.open { transform: rotate(180deg); }
+
+.sidebar-bottom { margin-top: auto; }
+.sidebar-bottom .btn { border-radius: 8px; transition: transform 0.3s var(--smooth-easing); }
+.sidebar-bottom .btn:hover { transform: scale(1.03); }
+
+/* --- CENTERED SEAMLESS TOGGLE BUTTON --- */
+.sidebar-toggle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: -14px; 
+    width: 28px;
+    height: 28px;
+    background: white;
+    color: #1e3a8a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    z-index: 1001;
+    transition: all 0.4s var(--smooth-easing), background 0.4s ease, border-color 0.4s ease;
 }
 
-.sidebar-bottom .btn{
-    border-radius:8px;
-    transition:0.3s;
+.sidebar-toggle:hover {
+    background: #f8fafc;
+    transform: translateY(-50%) scale(1.15);
+    color: #2563eb;
 }
 
-.sidebar-bottom .btn:hover{
-    transform:scale(1.03);
+.sidebar-toggle i {
+    transition: transform 0.4s var(--smooth-easing);
+    font-size: 14px;
 }
 
-/* 🧠 MAIN */
-.main{
-    margin-left:260px;
-    padding:40px;
+.sidebar.collapsed .sidebar-toggle {
+    right: -40px; 
+    background: #1e3a8a; 
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
-/* 💎 CARDS */
-.card{
-    background:white;
-    border:none;
-    border-radius:16px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.08);
-    padding:20px;
+.sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
 }
 
-/* 📊 STATS */
-.stat-card{
-    background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa);
-    color:white;
-    border-radius:16px;
-    padding:20px;
-    box-shadow:0 10px 25px rgba(37,99,235,0.4);
-    position:relative;
-    overflow:hidden;
-    transition:0.3s;
+/* --- MAIN CONTENT STYLES --- */
+.main { 
+    margin-left: 240px; 
+    padding: 40px; 
+    transition: margin-left 0.4s var(--smooth-easing); 
 }
 
-.stat-card:hover{
-    transform:translateY(-5px) scale(1.02);
-    box-shadow:0 15px 35px rgba(37,99,235,0.6);
+.main.expanded {
+    margin-left: 0px; 
 }
 
-.stat-card i {
-    opacity: 0.8;
+.card { 
+    background: white; border: none; border-radius: 16px; 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); padding: 20px; 
+    transition: background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
 }
 
-/* TABLE */
-table{
-    background:white;
-    border-radius:12px;
-    overflow:hidden;
+.stat-card { 
+    background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa); color: white; 
+    border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(37,99,235,0.4); 
+    position: relative; overflow: hidden; transition: all 0.4s var(--smooth-easing); 
+}
+.stat-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px rgba(37,99,235,0.6); }
+.stat-card i { opacity: 0.8; }
+
+table { background: white; border-radius: 12px; overflow: hidden; transition: background 0.4s ease; }
+.btn { border-radius: 8px; }
+input.form-control { border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: background 0.4s ease, color 0.4s ease; }
+#greeting { font-size: 22px; font-weight: 600; color: #1e3a8a; transition: color 0.4s ease; }
+
+.stagger-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpFade 0.6s var(--smooth-easing) forwards;
 }
 
-/* BUTTON */
-.btn{
-    border-radius:8px;
+@keyframes slideUpFade {
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* SEARCH */
-input.form-control{
-    border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+@media (max-width: 768px) {
+    .main { margin-left: 0; padding: 20px; }
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.collapsed { transform: translateX(0); }
+    .sidebar-toggle { right: -40px; background: #1e3a8a; color: white; border: none; }
+    .sidebar.collapsed .sidebar-toggle { right: -14px; background: white; color: #1e3a8a; }
 }
 
-/* 👋 GREETING */
-#greeting{
-    font-size:22px;
-    font-weight:600;
-    color:#1e3a8a;
-    margin-bottom:15px;
+/* 🔥 DARK MODE STYLES 🔥 */
+body.dark-mode {
+    background: #0f172a;
+    color: #e2e8f0;
 }
 
-#studentMenu a{
-    font-size:14px;
-    padding:6px 10px;
-    color:#c7d2fe;
+/* Sidebar Dark Mode Fix */
+body.dark-mode .sidebar {
+    background: #111827;
+    border-right: 1px solid #1f2937;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
 }
 
-#studentMenu a:hover{
-    background:rgba(255,255,255,0.15);
-    border-radius:8px;
+body.dark-mode .sidebar h4 { color: #f8fafc; }
+body.dark-mode .sidebar a { color: #9ca3af; }
+body.dark-mode .sidebar a:hover { background: rgba(255, 255, 255, 0.05); color: #f3f4f6; }
+body.dark-mode .sidebar a.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-left: 3px solid #3b82f6;
+}
+body.dark-mode #studentMenu a { color: #6b7280; }
+body.dark-mode #studentMenu a:hover { color: #e5e7eb; }
+
+/* Cards & Tables Dark Mode Fix */
+body.dark-mode .card,
+body.dark-mode table {
+    background: #1e293b;
+    color: #e2e8f0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 
+body.dark-mode .table td, 
+body.dark-mode .table th,
+body.dark-mode .table thead.table-light th {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+/* Input Fields Dark Mode Fix */
+body.dark-mode input.form-control,
+body.dark-mode select.form-select,
+body.dark-mode textarea.form-control {
+    background-color: #0f172a;
+    color: #f8fafc;
+    border-color: #334155;
+}
+
+body.dark-mode input.form-control:focus,
+body.dark-mode select.form-select:focus,
+body.dark-mode textarea.form-control:focus {
+    background-color: #0f172a;
+    color: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+}
+
+body.dark-mode input.form-control::placeholder,
+body.dark-mode textarea.form-control::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode input.form-control:disabled,
+body.dark-mode input.form-control[readonly],
+body.dark-mode select.form-select:disabled,
+body.dark-mode select.form-select[readonly],
+body.dark-mode textarea.form-control[readonly] {
+    background-color: #1e293b !important; 
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+    opacity: 1;
+}
+
+body.dark-mode label,
+body.dark-mode .form-check-label {
+    color: #cbd5e1;
+}
+
+/* Text & Utilities Dark Mode Fix */
+body.dark-mode .text-primary { color: #60a5fa !important; }
+body.dark-mode .text-muted,
+body.dark-mode .text-secondary { color: #94a3b8 !important; }
+body.dark-mode .bg-light { background-color: #334155 !important; color: #e2e8f0 !important; }
+body.dark-mode #greeting { color: #60a5fa; }
+
+/* Seamless Toggle Button Dark Mode Fix */
+body.dark-mode .sidebar-toggle {
+    background: #1e293b;
+    color: #60a5fa;
+    border-color: #334155;
+}
+
+body.dark-mode .sidebar.collapsed .sidebar-toggle {
+    background: #0f172a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    color: #e2e8f0;
+}
 </style>
-
 </head>
 
-<body>
+<body class="preload">
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-
-<h4>NGMC ERP Panel</h4>
-<hr>
-
-{% if user.groups.all.0.name == "Admin" %}
-
-<a href="{% url 'admin_dashboard' %}" 
-   class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-   Dashboard
-</a>
-
-<!-- STUDENTS DROPDOWN -->
-<div>
-
-<a href="javascript:void(0)" onclick="toggleStudentMenu()" class="d-flex justify-content-between align-items-center">
-    Students
-    <span id="arrow">▼</span>
-</a>
-
-<div id="studentMenu" style="display:none; margin-left:10px;">
-
-    <a href="{% url 'student_list' %}"
-       class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
-       Student Search
-    </a>
-
-    <a href="{% url 'add_student' %}"
-       class="{% if request.resolver_match.url_name == 'add_student' %}active{% endif %}">
-       Add Student
-    </a>
-
-</div>
-
-</div>
-
-<a href="{% url 'faculty_list' %}"
-   class="{% if request.resolver_match.url_name == 'faculty_list' %}active{% endif %}">
-   Faculty
-</a>
-
-<a href="{% url 'departments' %}"
-   class="{% if request.resolver_match.url_name == 'departments' %}active{% endif %}">
-   Departments
-</a>
-
-<a href="{% url 'export' %}"
-   class="{% if request.resolver_match.url_name == 'export_page' %}active{% endif %}">
-   Export Excel
-</a>
-
-<a href="{% url 'digilocker' %}"
-   class="{% if request.resolver_match.url_name == 'digilocker' %}active{% endif %}">
-   DigiLocker
-</a>
-
-{% endif %}
-
-<!-- 🔻 BOTTOM -->
-<div class="sidebar-bottom">
-
-<a href="{% url 'change_password' %}" 
-   class="btn btn-sm w-100 mb-2"
-   style="background:#0ea5e9; color:white;">
-   Change Password
-</a>
-
-<form action="{% url 'logout' %}" method="POST">
-    {% csrf_token %}
-    <button class="btn w-100 text-white"
-            style="background:linear-gradient(45deg,#ef4444,#dc2626);">
-        Logout
-    </button>
-</form>
-
-</div>
-
-</div>
-
-<!-- MAIN -->
-<div class="main animate__animated animate__fadeIn">
-
-<div id="greeting"></div>
-
-<h3 class="mb-4">{% block title %}{% endblock %}</h3>
-
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} text-center">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
-
-{% block content %}{% endblock %}
-
-</div>
-
-<!-- GREETING SCRIPT -->
 <script>
+    if (localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+    }
+    
+    // Once the page is fully ready, remove the preload class to allow animations again
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            document.body.classList.remove('preload');
+        }, 50); // Small 50ms buffer ensures the browser paints the dark background first
+    });
+</script>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+        <i class="bi bi-chevron-left"></i>
+    </div>
+
+    <div class="d-flex align-items-center mb-3 mt-2">
+        <img src="{% static 'logo.gif' %}" alt="Logo" class="sidebar-logo me-3" onerror="this.style.display='none'">
+        <h4>NGMC ERP</h4>
+    </div>
+    <hr class="mt-0 text-white-50">
+
+    {% if request.user.is_superuser or request.user.groups.all.0.name == "Admin" %}
+        <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+        
+        <div>
+            <a href="javascript:void(0)" onclick="toggleStudentMenu()" class="d-flex justify-content-between align-items-center">
+                Students<span id="arrow">▼</span>
+            </a>
+            <div id="studentMenu">
+                <a href="{% url 'student_list' %}" class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">Student Search</a>
+                <a href="{% url 'add_student' %}" class="{% if request.resolver_match.url_name == 'add_student' %}active{% endif %}">Add Student</a>
+            </div>
+        </div>
+
+        <a href="{% url 'faculty_list' %}" class="{% if request.resolver_match.url_name == 'faculty_list' %}active{% endif %}">Faculty</a>
+        <a href="{% url 'departments' %}" class="{% if request.resolver_match.url_name == 'departments' %}active{% endif %}">Departments</a>
+        <a href="{% url 'advanced_settings' %}" class="{% if request.resolver_match.url_name == 'advanced_settings' %}active{% endif %}">Advanced Fields</a>
+        <a href="{% url 'export' %}" class="{% if request.resolver_match.url_name == 'export' %}active{% endif %}">Export Excel</a>
+        <a href="{% url 'digilocker' %}" class="{% if 'digilocker' in request.path or 'locker' in request.path %}active{% endif %}">DigiLocker</a>
+
+    {% elif request.user.faculty %}
+        <a href="{% url 'faculty_dashboard' %}" class="{% if request.resolver_match.url_name == 'faculty_dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'student_list' %}" class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">Students</a>
+        <a href="{% url 'export' %}" class="{% if request.resolver_match.url_name == 'export' %}active{% endif %}">Export Excel</a>
+
+    {% else %}
+        <a href="{% url 'student_dashboard' %}" class="{% if request.resolver_match.url_name == 'student_dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'digilocker' %}" class="{% if 'digilocker' in request.path or 'locker' in request.path %}active{% endif %}">DigiLocker</a>
+    {% endif %}
+
+    <div class="sidebar-bottom">
+        <a href="{% url 'change_password' %}" class="btn btn-sm w-100 mb-2" style="background:#0ea5e9; color:white;">Change Password</a>
+        <form action="{% url 'logout' %}" method="POST">
+            {% csrf_token %}
+            <button class="btn w-100 text-white" style="background:linear-gradient(45deg,#ef4444,#dc2626);">Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main" id="mainContent">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <div id="greeting"></div>
+            <h3 class="mt-2 mb-0">{% block title %}{% endblock %}</h3>
+        </div>
+        <button id="themeToggle" class="btn btn-dark btn-sm rounded-circle p-2 shadow-sm" onclick="toggleDarkMode()" title="Toggle Dark Mode" style="width: 40px; height: 40px;">
+            <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+        </button>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("mainContent");
+    
+    sidebar.classList.toggle("collapsed");
+    if(window.innerWidth > 768) {
+        mainContent.classList.toggle("expanded");
+    }
+}
+
 function getGreetingData() {
     const hour = new Date().getHours();
-
     if (hour < 12) return "Good Morning 🌤️";
     if (hour < 17) return "Good Afternoon ☀️";
     if (hour < 21) return "Good Evening 🌆";
     return "Good Night 🌙";
 }
 
-const username = "{{ request.user.username }}";
+const username = "{% if request.user.is_superuser or request.user.groups.all.0.name == 'Admin' %}Admin{% elif request.user.first_name %}{{ request.user.first_name|escapejs }}{% else %}{{ request.user.username|escapejs }}{% endif %}";
+document.getElementById("greeting").innerText = `${getGreetingData()}, ${username}`;
 
-document.getElementById("greeting").innerText =
-    `${getGreetingData()}, ${username}`;
-</script>
-
-<script>
 function toggleStudentMenu() {
     const menu = document.getElementById("studentMenu");
     const arrow = document.getElementById("arrow");
+    menu.classList.toggle("open");
+    arrow.classList.toggle("open");
+}
 
-    if (menu.style.display === "none") {
-        menu.style.display = "block";
-        arrow.innerText = "▲";
+/* 🔥 DARK MODE JAVASCRIPT LOGIC 🔥 */
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+    updateThemeIcon(isDark);
+}
+
+function updateThemeIcon(isDark) {
+    const icon = document.getElementById('themeIcon');
+    const btn = document.getElementById('themeToggle');
+    if (isDark) {
+        icon.className = 'bi bi-sun-fill text-warning';
+        btn.className = 'btn btn-outline-light rounded-circle p-2 shadow-sm';
     } else {
-        menu.style.display = "none";
-        arrow.innerText = "▼";
+        icon.className = 'bi bi-moon-stars-fill text-light';
+        btn.className = 'btn btn-dark rounded-circle p-2 shadow-sm';
     }
 }
-</script>
 
+document.addEventListener("DOMContentLoaded", function() {
+    const isDark = document.body.classList.contains('dark-mode');
+    updateThemeIcon(isDark);
+
+    const animatedElements = document.querySelectorAll('.main .card, .main .stat-card, .main table, .main .alert');
+    animatedElements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+        el.classList.add('stagger-item');
+    });
+
+    if(window.innerWidth <= 768) {
+        document.getElementById("sidebar").classList.add("collapsed");
+    }
+});
+</script>
 </body>
 </html>

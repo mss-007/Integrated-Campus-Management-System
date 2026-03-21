@@ -7,74 +7,60 @@
 <h5 class="mb-3">Filter Students</h5>
 
 <form method="GET" class="mb-4">
+    <div class="row g-2">
+        <div class="col-md-5">
+            <input type="text" name="q" class="form-control"
+                   placeholder="Search by name, roll, email..."
+                   value="{{ request.GET.q }}">
+        </div>
 
-<div class="row g-2">
+        <div class="col-md-4">
+            <select name="type" class="form-select">
+                <option value="">All Programmes</option>
+                <option value="UG" {% if request.GET.type == "UG" %}selected{% endif %}>UG</option>
+                <option value="PG" {% if request.GET.type == "PG" %}selected{% endif %}>PG</option>
+                <option value="Research" {% if request.GET.type == "Research" %}selected{% endif %}>Research Scholars</option>
+            </select>
+        </div>
 
-<!-- 🔍 SEARCH -->
-<div class="col-md-5">
-<input type="text" name="q" class="form-control"
-placeholder="Search by name, roll, email..."
-value="{{ request.GET.q }}">
-</div>
-
-<!-- 🎯 PROGRAMME FILTER -->
-<div class="col-md-4">
-<select name="type" class="form-select">
-    <option value="">All Programmes</option>
-    <option value="UG" {% if request.GET.type == "UG" %}selected{% endif %}>UG</option>
-    <option value="PG" {% if request.GET.type == "PG" %}selected{% endif %}>PG</option>
-    <option value="Research" {% if request.GET.type == "Research" %}selected{% endif %}>Research Scholars</option>
-</select>
-</div>
-
-<!-- 🔘 BUTTON -->
-<div class="col-md-3">
-<button class="btn btn-primary w-100">Apply Filter</button>
-</div>
-
-</div>
-
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-primary w-100">
+                <i class="bi bi-search me-2"></i> Apply Filter
+            </button>
+            <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">
+                Clear
+            </a>
+        </div>
+    </div>
 </form>
 
-<!-- 📊 TABLE -->
 <div class="card p-4">
-
-<table class="table table-hover align-middle">
-
-<thead>
-<tr>
-<th>Name</th>
-<th>Roll</th>
-<th>Dept</th>
-<th>Action</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for s in students %}
-<tr>
-<td>{{ s.name }}</td>
-<td>{{ s.roll_no }}</td>
-<td>{{ s.department }}</td>
-<td>
-<a href="/student/{{ s.id }}" class="btn btn-sm btn-primary">View</a>
-<a href="/student/{{ s.id }}/edit/" class="btn btn-sm btn-warning">Edit</a>
-</td>
-</tr>
-
-{% empty %}
-<tr>
-<td colspan="4" class="text-center text-muted">
-No students found
-</td>
-</tr>
-{% endfor %}
-
-</tbody>
-
-</table>
-
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Roll</th>
+                <th>Dept</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students %}
+            <tr>
+                <td>{{ s.name }}</td>
+                <td>{{ s.roll_no }}</td>
+                <td>{{ s.department }}</td>
+                <td>
+                    <a href="/student/{{ s.id }}" class="btn btn-sm btn-primary">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No students found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 {% endblock %}

@@ -1,25 +1,71 @@
 {% extends 'base.html' %}
-{% block title %}DigiLocker{% endblock %}
+{% block title %}DigiLocker Admin{% endblock %}
 
 {% block content %}
-
-<div class="d-flex justify-content-center align-items-center" style="height:70vh;">
+<style>
+    /* 🔥 Dark Mode Fixes for Admin Table & Buttons 🔥 */
+    body.dark-mode .table-hover tbody tr:hover td {
+        background-color: #334155;
+        color: #f8fafc;
+    }
     
-    <div class="text-center p-5" style="background:white; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
-        
-        <h2 class="mb-3">🚧 Coming Soon</h2>
-        
-        <p class="text-muted">
-            DigiLocker integration is under development.<br>
-            Try not to panic.
-        </p>
+    body.dark-mode .btn-outline-secondary {
+        color: #94a3b8;
+        border-color: #475569;
+    }
+    
+    body.dark-mode .btn-outline-secondary:hover {
+        background-color: #475569;
+        color: #ffffff;
+    }
+</style>
 
-        <a href="/admin-dashboard/" class="btn btn-primary mt-3">
-            Back to Dashboard
-        </a>
+<div class="card p-4">
 
-    </div>
+    <h4 class="mb-4">🗄️ DigiLocker Central Access</h4>
+
+    <form method="GET" class="mb-4">
+        <div class="input-group w-75">
+            <input type="text" name="q" class="form-control" 
+                   placeholder="Search student by Name, Roll No, or Dept..." 
+                   value="{{ request.GET.q }}">
+            
+            <button class="btn btn-primary">
+                <i class="bi bi-search me-1"></i> Search
+            </button>
+            
+            <a href="{% url 'digilocker' %}" class="btn btn-outline-secondary">
+                Clear
+            </a>
+        </div>
+    </form>
+
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Roll No</th>
+                <th>Department</th>
+                <th class="text-end">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students %}
+            <tr>
+                <td>{{ s.name }}</td>
+                <td>{{ s.roll_no }}</td>
+                <td>{{ s.department }}</td>
+                <td class="text-end">
+                    <a href="/digilocker/{{ s.id }}/" class="btn btn-warning btn-sm">Open Locker 📁</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No students found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </div>
-
 {% endblock %}

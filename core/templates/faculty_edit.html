@@ -2,27 +2,47 @@
 {% block title %}Edit Faculty{% endblock %}
 
 {% block content %}
+<style>
+    /* 🔥 Fix Chrome Autofill Yellow/Beige Background in Dark Mode 🔥 */
+    body.dark-mode input:-webkit-autofill,
+    body.dark-mode input:-webkit-autofill:hover, 
+    body.dark-mode input:-webkit-autofill:focus, 
+    body.dark-mode input:-webkit-autofill:active,
+    body.dark-mode select:-webkit-autofill,
+    body.dark-mode textarea:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+        -webkit-text-fill-color: #f8fafc !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* Ensure dropdown options turn dark */
+    body.dark-mode select.form-select option {
+        background-color: #0f172a;
+        color: #f8fafc;
+    }
+</style>
 
 <div class="card p-4">
-
 <h4 class="mb-3">Edit Faculty</h4>
-
 <form method="POST">
 {% csrf_token %}
+<div class="row">
+{% if 'name' in labels %}<div class="col-md-6"><label>{{ labels.name }}</label><input name="name" class="form-control mb-2" value="{{ faculty.name }}"></div>{% endif %}
+{% if 'department' in labels %}<div class="col-md-6"><label>{{ labels.department }}</label><input name="department" class="form-control mb-2" value="{{ faculty.department }}"></div>{% endif %}
+{% if 'designation' in labels %}<div class="col-md-6"><label>{{ labels.designation }}</label><input name="designation" class="form-control mb-2" value="{{ faculty.designation }}"></div>{% endif %}
+{% if 'staff_type' in labels %}
+<div class="col-md-6"><label>{{ labels.staff_type }}</label>
+<select name="staff_type" class="form-select mb-2"><option value="teaching" {% if faculty.staff_type == 'teaching' %}selected{% endif %}>Teaching</option><option value="non_teaching" {% if faculty.staff_type == 'non_teaching' %}selected{% endif %}>Non Teaching</option></select>
+</div>
+{% endif %}
 
-<label>Name</label>
-<input name="name" class="form-control mb-2" value="{{ faculty.name }}">
-
-<label>Department</label>
-<input name="department" class="form-control mb-2" value="{{ faculty.department }}">
-
-<label>Designation</label>
-<input name="designation" class="form-control mb-2" value="{{ faculty.designation }}">
-
-<button class="btn btn-success mt-2">Save Changes</button>
-
-</form>
-
+{% if custom_fields %}<div class="col-md-12 mt-3"><h5 class="text-primary">Additional Details</h5><hr></div>{% endif %}
+{% for cf in custom_fields %}
+<div class="col-md-6"><label>{{ cf.display_name }}</label><input name="custom_{{ cf.id }}" class="form-control mb-2" value="{{ cf.current_value }}"></div>
+{% endfor %}
 </div>
 
+<button class="btn btn-success mt-3">Save Changes</button>
+</form>
+</div>
 {% endblock %}

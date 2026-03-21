@@ -2,41 +2,32 @@
 {% block title %}Student Details{% endblock %}
 
 {% block content %}
-
 <div class="card p-4">
+    <h3 class="mb-4">{{ student.name }}</h3>
 
-<h3 class="mb-4">{{ student.name }}</h3>
-
-<div class="row">
-
-{% for field in fields %}
-
-    <div class="col-md-6 mb-3">
-        <p class="mb-1 text-muted" style="font-size:13px;">
-            {{ field.label }}
-        </p>
-        <p class="fw-semibold">
-            {{ field.value }}
-        </p>
+    <div class="row">
+        {% for field in fields %}
+            <div class="col-md-6 mb-3">
+                <p class="mb-1 text-muted" style="font-size:13px;">{{ field.label }}</p>
+                <p class="fw-semibold">{{ field.value }}</p>
+            </div>
+        {% endfor %}
     </div>
 
-{% endfor %}
+    <div class="d-flex gap-2 mt-3 pt-3 border-top">
+        {% if is_admin or is_faculty %}
+            <a href="{% url 'student_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
+        {% else %}
+            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary btn-sm">Back to Dashboard</a>
+        {% endif %}
 
+        <a href="/student/full/{{ student.id }}/" class="btn btn-info btn-sm text-white">More Details</a>
+        <a href="/digilocker/{{ student.id }}/" class="btn btn-warning btn-sm text-dark">View DigiLocker</a>
+
+        {% if is_admin %}
+            <a href="/student/{{ student.id }}/edit/" class="btn btn-primary btn-sm">Edit Details</a>
+            <a href="/student/{{ student.id }}/delete/" class="btn btn-danger btn-sm" onclick="return confirm('Delete this student?');">Delete</a>
+        {% endif %}
+    </div>
 </div>
-
-<!-- BUTTONS -->
-<div class="d-flex gap-2 mt-3">
-    <a href="/student/{{ student.id }}/edit/" class="btn btn-primary btn-sm">
-        Edit Details
-    </a>
-
-    <a href="/student/{{ student.id }}/delete/"
-       class="btn btn-danger btn-sm"
-       onclick="return confirm('Delete this student?');">
-        Delete
-    </a>
-</div>
-
-</div>
-
 {% endblock %}

@@ -1,3 +1,10 @@
+# Django Database
+*.sqlite3
+db.sqlite3
+
+# Uploaded Media (DigiLocker files)
+media/
+
+# Python Cache
 __pycache__/
 *.pyc
-db.sqlite3

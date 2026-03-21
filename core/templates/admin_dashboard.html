@@ -2,69 +2,87 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
+<style>
+    /* 🔥 Dark Mode Overrides for Stat Cards 🔥 */
+    body.dark-mode .stat-card {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border: 1px solid #334155;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    
+    body.dark-mode .stat-card:hover {
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        border-color: #475569;
+    }
 
-<!-- 📊 STATS ONLY -->
+    /* Make the icons pop in neon blue since the background is dark now */
+    body.dark-mode .stat-card i {
+        color: #60a5fa; 
+        opacity: 1;
+    }
+</style>
+
 <div class="row g-4">
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Total Students</h6>
-        <h3>{{ total_students }}</h3>
+    <div class="col-md-4">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <h6>Total Students</h6>
+                <h3>{{ total_students }}</h3>
+            </div>
+            <i class="bi bi-people-fill fs-2"></i>
+        </div>
     </div>
-    <i class="bi bi-people-fill fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Boys</h6>
-        <h3>{{ total_boys }}</h3>
+    <div class="col-md-4">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <h6>Boys</h6>
+                <h3>{{ total_boys }}</h3>
+            </div>
+            <i class="bi bi-gender-male fs-2"></i>
+        </div>
     </div>
-    <i class="bi bi-gender-male fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Girls</h6>
-        <h3>{{ total_girls }}</h3>
+    <div class="col-md-4">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <h6>Girls</h6>
+                <h3>{{ total_girls }}</h3>
+            </div>
+            <i class="bi bi-gender-female fs-2"></i>
+        </div>
     </div>
-    <i class="bi bi-gender-female fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Departments</h6>
-        <h3>{{ total_departments }}</h3>
+    <div class="col-md-4">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <h6>Departments</h6>
+                <h3>{{ total_departments }}</h3>
+            </div>
+            <i class="bi bi-building fs-2"></i>
+        </div>
     </div>
-    <i class="bi bi-building fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Faculty</h6>
-        <h3>{{ teaching_faculty }}</h3>
+    <div class="col-md-4">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <h6>Faculty</h6>
+                <h3>{{ teaching_faculty }}</h3>
+            </div>
+            <i class="bi bi-person-badge-fill fs-2"></i>
+        </div>
     </div>
-    <i class="bi bi-person-badge-fill fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Non Teaching</h6>
-        <h3>{{ non_teaching }}</h3>
+    <div class="col-md-4">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <h6>Non Teaching</h6>
+                <h3>{{ non_teaching }}</h3>
+            </div>
+            <i class="bi bi-person-workspace fs-2"></i>
+        </div>
     </div>
-    <i class="bi bi-person-workspace fs-2"></i>
-</div>
-</div>
 
 </div>
 

@@ -1,36 +1,45 @@
 {% extends 'base.html' %}
-{% block title %}Faculty Dashboard{% endblock %}
+{% block title %}{% endblock %}
 
 {% block content %}
-
-<form method="GET" class="mb-3">
-<input name="q" class="form-control" placeholder="Search students">
-</form>
-
-<div class="card p-4">
-
-<table class="table table-hover">
-
-<tr>
-<th>Name</th>
-<th>Department</th>
-<th>Action</th>
-</tr>
-
-{% for s in students %}
-
-<tr>
-<td>{{ s.name }}</td>
-<td>{{ s.department }}</td>
-<td>
-<a href="/student/{{ s.id }}" class="btn btn-sm btn-info">View</a>
-</td>
-</tr>
-
-{% endfor %}
-
-</table>
-
+<div class="card p-4 border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white;">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1">Welcome, {{ faculty.name }}</h2>
+            <p class="mb-0 text-white-50">Faculty Dashboard - Department of {{ faculty.department }}</p>
+        </div>
+        <i class="bi bi-person-workspace" style="font-size: 4rem; opacity: 0.8;"></i>
+    </div>
 </div>
 
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card p-4 shadow-sm h-100 border-0">
+            <h5 class="text-secondary border-bottom pb-2 mb-3">My Details</h5>
+            <p class="mb-2"><strong>Name:</strong> <span class="text-muted ms-2">{{ faculty.name }}</span></p>
+            <p class="mb-2"><strong>Department:</strong> <span class="text-muted ms-2">{{ faculty.department }}</span></p>
+            <p class="mb-2"><strong>Designation:</strong> <span class="text-muted ms-2">{{ faculty.designation }}</span></p>
+            <p class="mb-3"><strong>Staff Type:</strong> <span class="text-muted ms-2">{{ faculty.get_staff_type_display }}</span></p>
+            
+            {% if extra_data %}
+                <h6 class="text-secondary mt-3 mb-2">Additional Information</h6>
+                {% for data in extra_data %}
+                    <p class="mb-2"><strong>{{ data.field.display_name }}:</strong> <span class="text-muted ms-2">{{ data.value|default:"-" }}</span></p>
+                {% endfor %}
+            {% endif %}
+            
+            <p class="text-danger small mt-auto mb-0 pt-4 border-top"><em>* To request changes to your profile or department, please contact the Admin.</em></p>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card p-4 shadow-sm h-100 border-0 text-center bg-light">
+            <h5 class="text-secondary mb-3">Students in My Department</h5>
+            <h1 class="display-1 text-success fw-bold my-auto">{{ my_students_count }}</h1>
+            <a href="{% url 'student_list' %}" class="btn btn-outline-success mt-auto">
+                View Student List <i class="bi bi-arrow-right-short"></i>
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock %}
