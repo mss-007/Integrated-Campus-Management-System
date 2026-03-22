@@ -1,25 +1,100 @@
 {% extends 'base.html' %}
-{% block title %}DigiLocker{% endblock %}
+{% block title %}DigiLocker Central{% endblock %}
 
 {% block content %}
+<style>
+    /* 🔥 Dark Mode Fixes 🔥 */
+    body.dark-mode .card { background-color: #1e293b; border-color: #334155 !important; }
+    body.dark-mode .table { color: #f8fafc; }
+    body.dark-mode .table-light th { background-color: #0f172a; color: #94a3b8; border-bottom: 2px solid #334155; border-top: none; }
+    body.dark-mode td { border-bottom-color: #334155; }
+    body.dark-mode .table-hover tbody tr:hover td { background-color: rgba(51, 65, 85, 0.5); color: #f8fafc; }
+    body.dark-mode .text-muted { color: #94a3b8 !important; }
 
-<div class="d-flex justify-content-center align-items-center" style="height:70vh;">
-    
-    <div class="text-center p-5" style="background:white; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
-        
-        <h2 class="mb-3">🚧 Coming Soon</h2>
-        
-        <p class="text-muted">
-            DigiLocker integration is under development.<br>
-            Try not to panic.
-        </p>
+    /* 🔥 Custom Search Bar 🔥 */
+    .search-wrapper {
+        display: flex; align-items: center; background-color: #ffffff;
+        border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; transition: all 0.3s ease;
+    }
+    .search-wrapper:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+    .search-icon { padding: 0 16px; color: #94a3b8; font-size: 1.1rem; display: flex; }
+    .search-input { border: none !important; box-shadow: none !important; background: transparent !important; padding: 12px 0; font-size: 1rem; flex-grow: 1; }
+    .clear-btn { padding: 0 16px; color: #cbd5e1; font-size: 1.2rem; display: flex; transition: color 0.2s ease; }
+    .clear-btn:hover { color: #ef4444; }
+    .search-btn { border-radius: 0; padding: 12px 28px; font-weight: 600; height: 100%; }
 
-        <a href="/admin-dashboard/" class="btn btn-primary mt-3">
-            Back to Dashboard
-        </a>
+    /* Search Bar Dark Mode */
+    body.dark-mode .search-wrapper { background-color: #0f172a; border-color: #334155; }
+    body.dark-mode .search-input { color: #f8fafc; }
+    body.dark-mode .search-wrapper:focus-within { border-color: #3b82f6; }
+    body.dark-mode .clear-btn { color: #475569; }
+    body.dark-mode .clear-btn:hover { color: #f87171; }
 
+    /* Typography & UI */
+    .table th { font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+    .empty-state-icon { font-size: 3.5rem; color: #cbd5e1; margin-bottom: 12px; }
+    body.dark-mode .empty-state-icon { color: #475569; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 text-primary fw-bold"><i class="bi bi-safe-fill me-2"></i>DigiLocker Central Access</h3>
+</div>
+
+<div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
+
+    <form method="GET" class="mb-4">
+        <div class="search-wrapper shadow-sm">
+            <div class="search-icon"><i class="bi bi-search"></i></div>
+            <input type="text" name="q" class="form-control search-input" 
+                   placeholder="Search student by Name, Roll No, or Dept..." 
+                   value="{{ request.GET.q }}">
+            
+            {% if request.GET.q %}
+            <a href="{% url 'digilocker' %}" class="clear-btn text-decoration-none" title="Clear Search">
+                <i class="bi bi-x-circle-fill"></i>
+            </a>
+            {% endif %}
+            <button class="btn btn-primary search-btn" type="submit">Search</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Student Name</th>
+                    <th>Roll No</th>
+                    <th>Department</th>
+                    <th class="text-end pe-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td class="ps-3 fw-medium">
+                        <i class="bi bi-person-circle text-muted me-2 fs-5 align-middle"></i>
+                        {{ s.name }}
+                    </td>
+                    <td><span class="text-secondary fw-bold" style="font-family: monospace; font-size: 0.95rem;">{{ s.roll_no }}</span></td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">{{ s.department }}</span></td>
+                    <td class="text-end pe-3">
+                        <a href="/digilocker/{{ s.id }}/" class="btn btn-warning text-dark fw-bold shadow-sm" style="border-radius: 8px;">
+                            <i class="bi bi-folder-fill me-1"></i> Open Locker
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5">
+                        <div class="empty-state-icon"><i class="bi bi-file-earmark-lock"></i></div>
+                        <h5 class="text-muted fw-bold mb-1">No students found</h5>
+                        <p class="text-muted small mb-0">Try searching with a different name or roll number.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
 </div>
-
 {% endblock %}

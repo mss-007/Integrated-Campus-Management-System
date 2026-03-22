@@ -2,70 +2,181 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
+<style>
+    /* 🔥 Dashboard UI Polish 🔥 */
+    .dashboard-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+    }
 
-<!-- 📊 STATS ONLY -->
-<div class="row g-4">
+    /* Premium Stat Cards */
+    .stat-card-modern {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        border-color: #e2e8f0;
+    }
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Total Students</h6>
-        <h3>{{ total_students }}</h3>
+    .stat-info h6 { color: #64748b; font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+    .stat-info h2 { color: #1e293b; font-weight: 800; margin-bottom: 0; font-size: 2.2rem; }
+
+    /* Icon Wrappers for visual pop */
+    .icon-wrapper {
+        width: 65px; height: 65px;
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2rem;
+    }
+
+    /* Colors */
+    .text-blue { color: #3b82f6; } .bg-blue-light { background: #eff6ff; }
+    .text-cyan { color: #06b6d4; } .bg-cyan-light { background: #ecfeff; }
+    .text-pink { color: #ec4899; } .bg-pink-light { background: #fdf2f8; }
+    .text-indigo { color: #6366f1; } .bg-indigo-light { background: #eef2ff; }
+    .text-emerald { color: #10b981; } .bg-emerald-light { background: #ecfdf5; }
+    .text-slate { color: #475569; } .bg-slate-light { background: #f8fafc; }
+
+    /* Quick Action Buttons */
+    .quick-action-btn {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 20px; background: #ffffff; border-radius: 16px;
+        color: #1e293b; text-decoration: none; font-weight: 600;
+        border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        transition: all 0.2s ease;
+    }
+    .quick-action-btn i { font-size: 2rem; margin-bottom: 10px; color: #3b82f6; transition: transform 0.2s; }
+    .quick-action-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #2563eb; transform: translateY(-3px); }
+    .quick-action-btn:hover i { transform: scale(1.1); }
+
+    /* 🔥 Dark Mode Fixes 🔥 */
+    body.dark-mode .dashboard-section-title { color: #94a3b8; border-color: #334155; }
+    body.dark-mode .stat-card-modern { background: #1e293b; border-color: #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    body.dark-mode .stat-card-modern:hover { border-color: #475569; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+    body.dark-mode .stat-info h6 { color: #94a3b8; }
+    body.dark-mode .stat-info h2 { color: #f8fafc; }
+    
+    /* Dark Mode Icon Backgrounds */
+    body.dark-mode .bg-blue-light { background: rgba(59, 130, 246, 0.15); }
+    body.dark-mode .bg-cyan-light { background: rgba(6, 182, 212, 0.15); }
+    body.dark-mode .bg-pink-light { background: rgba(236, 72, 153, 0.15); }
+    body.dark-mode .bg-indigo-light { background: rgba(99, 102, 241, 0.15); }
+    body.dark-mode .bg-emerald-light { background: rgba(16, 185, 129, 0.15); }
+    body.dark-mode .bg-slate-light { background: rgba(148, 163, 184, 0.15); }
+
+    body.dark-mode .quick-action-btn { background: #1e293b; border-color: #334155; color: #f8fafc; }
+    body.dark-mode .quick-action-btn:hover { background: #0f172a; border-color: #475569; color: #60a5fa; }
+</style>
+
+<h5 class="dashboard-section-title mt-2"><i class="bi bi-pie-chart-fill me-2"></i>Student Demographics</h5>
+<div class="row g-4 mb-5">
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card-modern stagger-item">
+            <div class="stat-info">
+                <h6>Total Students</h6>
+                <h2>{{ total_students }}</h2>
+            </div>
+            <div class="icon-wrapper bg-blue-light text-blue"><i class="bi bi-people-fill"></i></div>
+        </div>
     </div>
-    <i class="bi bi-people-fill fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Boys</h6>
-        <h3>{{ total_boys }}</h3>
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card-modern stagger-item" style="animation-delay: 0.1s;">
+            <div class="stat-info">
+                <h6>Boys</h6>
+                <h2>{{ total_boys }}</h2>
+            </div>
+            <div class="icon-wrapper bg-cyan-light text-cyan"><i class="bi bi-gender-male"></i></div>
+        </div>
     </div>
-    <i class="bi bi-gender-male fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Girls</h6>
-        <h3>{{ total_girls }}</h3>
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card-modern stagger-item" style="animation-delay: 0.2s;">
+            <div class="stat-info">
+                <h6>Girls</h6>
+                <h2>{{ total_girls }}</h2>
+            </div>
+            <div class="icon-wrapper bg-pink-light text-pink"><i class="bi bi-gender-female"></i></div>
+        </div>
     </div>
-    <i class="bi bi-gender-female fs-2"></i>
-</div>
 </div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Departments</h6>
-        <h3>{{ total_departments }}</h3>
+<h5 class="dashboard-section-title"><i class="bi bi-building-fill-gear me-2"></i>Institutional Overview</h5>
+<div class="row g-4 mb-5">
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card-modern stagger-item" style="animation-delay: 0.3s;">
+            <div class="stat-info">
+                <h6>Departments</h6>
+                <h2>{{ total_departments }}</h2>
+            </div>
+            <div class="icon-wrapper bg-indigo-light text-indigo"><i class="bi bi-buildings-fill"></i></div>
+        </div>
     </div>
-    <i class="bi bi-building fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Faculty</h6>
-        <h3>{{ teaching_faculty }}</h3>
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card-modern stagger-item" style="animation-delay: 0.4s;">
+            <div class="stat-info">
+                <h6>Teaching Faculty</h6>
+                <h2>{{ teaching_faculty }}</h2>
+            </div>
+            <div class="icon-wrapper bg-emerald-light text-emerald"><i class="bi bi-person-badge-fill"></i></div>
+        </div>
     </div>
-    <i class="bi bi-person-badge-fill fs-2"></i>
-</div>
-</div>
 
-<div class="col-md-4">
-<div class="stat-card d-flex justify-content-between align-items-center">
-    <div>
-        <h6>Non Teaching</h6>
-        <h3>{{ non_teaching }}</h3>
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card-modern stagger-item" style="animation-delay: 0.5s;">
+            <div class="stat-info">
+                <h6>Non-Teaching Staff</h6>
+                <h2>{{ non_teaching }}</h2>
+            </div>
+            <div class="icon-wrapper bg-slate-light text-slate"><i class="bi bi-person-workspace"></i></div>
+        </div>
     </div>
-    <i class="bi bi-person-workspace fs-2"></i>
-</div>
 </div>
 
+<h5 class="dashboard-section-title"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Quick Actions</h5>
+<div class="row g-3">
+    <div class="col-md-3 col-sm-6">
+        <a href="{% url 'add_student' %}" class="quick-action-btn stagger-item" style="animation-delay: 0.6s;">
+            <i class="bi bi-person-plus-fill text-success"></i>
+            Add Student
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="{% url 'add_faculty' %}" class="quick-action-btn stagger-item" style="animation-delay: 0.7s;">
+            <i class="bi bi-person-vcard-fill text-indigo"></i>
+            Add Faculty
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="{% url 'digilocker' %}" class="quick-action-btn stagger-item" style="animation-delay: 0.8s;">
+            <i class="bi bi-safe-fill text-warning"></i>
+            DigiLocker Access
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="{% url 'advanced_settings' %}" class="quick-action-btn stagger-item" style="animation-delay: 0.9s;">
+            <i class="bi bi-gear-fill text-secondary"></i>
+            System Settings
+        </a>
+    </div>
 </div>
 
 {% endblock %}

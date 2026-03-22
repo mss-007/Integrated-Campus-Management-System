@@ -1,110 +1,229 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
-
 {% block title %}Student Full Details{% endblock %}
 
 {% block content %}
+<style>
+    /* 🔥 Dark Mode Fixes 🔥 */
+    body.dark-mode .card { background-color: #1e293b; border-color: #334155; }
+    body.dark-mode .text-muted { color: #94a3b8 !important; }
+    body.dark-mode .section-title { color: #60a5fa !important; }
+    body.dark-mode hr { border-color: #475569; }
+    body.dark-mode .data-value { color: #f8fafc; }
+    
+    /* Polished Typography */
+    .section-title { color: #475569; font-size: 1.1rem; letter-spacing: 0.5px; }
+    .data-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .data-value { font-size: 1.05rem; font-weight: 500; color: #1e293b; margin-bottom: 1.25rem; }
+    .btn-action { border-radius: 8px; font-weight: 600; padding: 8px 16px; }
+</style>
 
-<div class="card p-4">
+<div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
+    <h3 class="mb-4 text-primary fw-bold"><i class="bi bi-person-vcard-fill me-2"></i>{{ student.name }}</h3>
 
-<h3 class="mb-4">{{ student.name|clean }}</h3>
+    <h5 class="section-title fw-bold mb-3"><i class="bi bi-info-circle-fill me-2"></i>Basic Information</h5>
+    <div class="row">
+        {% if 'roll_no' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.roll_no }}</div>
+            <div class="data-value">{{ student.roll_no }}</div>
+        </div>
+        {% endif %}
+        {% if 'department' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.department }}</div>
+            <div class="data-value">{{ student.department }}</div>
+        </div>
+        {% endif %}
+        {% if 'admission_year' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.admission_year }}</div>
+            <div class="data-value">{{ student.admission_year }}</div>
+        </div>
+        {% endif %}
+    </div><hr class="mt-2 mb-4">
 
-<!-- BASIC -->
-<h5>Basic Information</h5>
-<div class="row">
-    <div class="col-md-4"><b>Roll No:</b> {{ student.roll_no|clean }}</div>
-    <div class="col-md-4"><b>Department:</b> {{ student.department|clean }}</div>
-    <div class="col-md-4"><b>Admission Year:</b> {{ student.admission_year|clean }}</div>
-</div>
+    <h5 class="section-title fw-bold mb-3"><i class="bi bi-person-lines-fill me-2"></i>Personal Details</h5>
+    <div class="row">
+        {% if 'dob' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.dob }}</div>
+            <div class="data-value">{{ student.dob|date:"d-m-Y"|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'gender' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.gender }}</div>
+            <div class="data-value">{{ student.gender }}</div>
+        </div>
+        {% endif %}
+        {% if 'blood_group' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.blood_group }}</div>
+            <div class="data-value">{{ student.blood_group|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'religion' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.religion }}</div>
+            <div class="data-value">{{ student.religion|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'category' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.category }}</div>
+            <div class="data-value">{{ student.category|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'physically_challenged' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.physically_challenged }}</div>
+            <div class="data-value">{{ student.physically_challenged|yesno:"Yes,No" }}</div>
+        </div>
+        {% endif %}
+        {% if 'aadhaar' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.aadhaar }}</div>
+            <div class="data-value">{{ student.aadhaar|default:"-" }}</div>
+        </div>
+        {% endif %}
+    </div><hr class="mt-2 mb-4">
 
-<hr>
+    <h5 class="section-title fw-bold mb-3"><i class="bi bi-telephone-fill me-2"></i>Contact Information</h5>
+    <div class="row">
+        {% if 'phone' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.phone }}</div>
+            <div class="data-value">{{ student.phone|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'email' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.email }}</div>
+            <div class="data-value">{{ student.email|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'permanent_address' in labels %}
+        <div class="col-md-12">
+            <div class="data-label text-muted">{{ labels.permanent_address }}</div>
+            <div class="data-value">{{ student.permanent_address|default:"-" }}</div>
+        </div>
+        {% endif %}
+    </div><hr class="mt-2 mb-4">
 
-<!-- PERSONAL -->
-<h5>Personal Details</h5>
-<div class="row">
-    <div class="col-md-4"><b>DOB:</b> {{ student.dob|date:"d-m-Y"|default:"-" }}</div>
-    <div class="col-md-4"><b>Gender:</b> {{ student.gender|clean }}</div>
-    <div class="col-md-4"><b>Blood Group:</b> {{ student.blood_group|clean }}</div>
-    <div class="col-md-4"><b>Religion:</b> {{ student.religion|clean }}</div>
-    <div class="col-md-4"><b>Category:</b> {{ student.category|clean }}</div>
+    <h5 class="section-title fw-bold mb-3"><i class="bi bi-people-fill me-2"></i>Family Details</h5>
+    <div class="row">
+        {% if 'father_name' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.father_name }}</div>
+            <div class="data-value">{{ student.father_name|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'mother_name' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.mother_name }}</div>
+            <div class="data-value">{{ student.mother_name|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'father_occupation' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.father_occupation }}</div>
+            <div class="data-value">{{ student.father_occupation|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'mother_occupation' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.mother_occupation }}</div>
+            <div class="data-value">{{ student.mother_occupation|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'father_phone' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.father_phone }}</div>
+            <div class="data-value">{{ student.father_phone|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'mother_phone' in labels %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ labels.mother_phone }}</div>
+            <div class="data-value">{{ student.mother_phone|default:"-" }}</div>
+        </div>
+        {% endif %}
+    </div><hr class="mt-2 mb-4">
 
-    <div class="col-md-4">
-        <b>Physically Challenged:</b>
-        {{ student.physically_challenged|yesno:"Yes,No" }}
+    <h5 class="section-title fw-bold mb-3"><i class="bi bi-mortarboard-fill me-2"></i>Academic Details</h5>
+    <div class="row">
+        {% if 'tenth_year' in labels %}
+        <div class="col-md-3 col-sm-6">
+            <div class="data-label text-muted">{{ labels.tenth_year }}</div>
+            <div class="data-value">{{ student.tenth_year|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'tenth_percentage' in labels %}
+        <div class="col-md-3 col-sm-6">
+            <div class="data-label text-muted">{{ labels.tenth_percentage }}</div>
+            <div class="data-value">{{ student.tenth_percentage|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'twelfth_year' in labels %}
+        <div class="col-md-3 col-sm-6">
+            <div class="data-label text-muted">{{ labels.twelfth_year }}</div>
+            <div class="data-value">{{ student.twelfth_year|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'twelfth_percentage' in labels %}
+        <div class="col-md-3 col-sm-6">
+            <div class="data-label text-muted">{{ labels.twelfth_percentage }}</div>
+            <div class="data-value">{{ student.twelfth_percentage|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'course' in labels %}
+        <div class="col-md-3 col-sm-6">
+            <div class="data-label text-muted">{{ labels.course }}</div>
+            <div class="data-value">{{ student.course|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'batch' in labels %}
+        <div class="col-md-3 col-sm-6">
+            <div class="data-label text-muted">{{ labels.batch }}</div>
+            <div class="data-value">{{ student.batch|default:"-" }}</div>
+        </div>
+        {% endif %}
+        {% if 'hosteller' in labels %}
+        <div class="col-md-3 col-sm-6">
+            <div class="data-label text-muted">{{ labels.hosteller }}</div>
+            <div class="data-value">{{ student.hosteller|yesno:"Yes,No" }}</div>
+        </div>
+        {% endif %}
     </div>
 
-    <div class="col-md-4"><b>Aadhaar:</b> {{ student.aadhaar|clean }}</div>
-</div>
-
-<hr>
-
-<!-- CONTACT -->
-<h5>Contact Information</h5>
-<div class="row">
-    <div class="col-md-4"><b>Phone:</b> {{ student.phone|clean }}</div>
-    <div class="col-md-4"><b>Email:</b> {{ student.email|clean }}</div>
-    <div class="col-md-4"><b>Address:</b> {{ student.permanent_address|clean }}</div>
-</div>
-
-<hr>
-
-<!-- FAMILY -->
-<h5>Family Details</h5>
-<div class="row">
-    <div class="col-md-4"><b>Father Name:</b> {{ student.father_name|clean }}</div>
-    <div class="col-md-4"><b>Mother Name:</b> {{ student.mother_name|clean }}</div>
-    <div class="col-md-4"><b>Father Occupation:</b> {{ student.father_occupation|clean }}</div>
-    <div class="col-md-4"><b>Mother Occupation:</b> {{ student.mother_occupation|clean }}</div>
-    <div class="col-md-4"><b>Father Phone:</b> {{ student.father_phone|clean }}</div>
-    <div class="col-md-4"><b>Mother Phone:</b> {{ student.mother_phone|clean }}</div>
-    <div class="col-md-4"><b>Guardian:</b> {{ student.guardian_name|clean }}</div>
-</div>
-
-<hr>
-
-<!-- ACADEMIC -->
-<h5>Academic Details</h5>
-<div class="row">
-    <div class="col-md-3"><b>10th Year:</b> {{ student.tenth_year|clean }}</div>
-    <div class="col-md-3"><b>10th %:</b> {{ student.tenth_percentage|clean }}</div>
-    <div class="col-md-3"><b>12th Year:</b> {{ student.twelfth_year|clean }}</div>
-    <div class="col-md-3"><b>12th %:</b> {{ student.twelfth_percentage|clean }}</div>
-
-    <div class="col-md-3"><b>Course:</b> {{ student.course|clean }}</div>
-    <div class="col-md-3"><b>Batch:</b> {{ student.batch|clean }}</div>
-
-    <div class="col-md-3">
-        <b>Hosteller:</b>
-        {{ student.hosteller|yesno:"Yes,No" }}
+    {% if extra_data %}
+    <hr class="mt-2 mb-4">
+    <h5 class="section-title fw-bold mb-3"><i class="bi bi-clipboard2-data-fill me-2"></i>Additional Details</h5>
+    <div class="row">
+        {% for data in extra_data %}
+        <div class="col-md-4 col-sm-6">
+            <div class="data-label text-muted">{{ data.field.display_name }}</div>
+            <div class="data-value">{{ data.value|default:"-" }}</div>
+        </div>
+        {% endfor %}
     </div>
-</div>
-
-<hr>
-
-<!-- ACTION BUTTONS -->
-<!-- ACTION BUTTONS -->
-<div class="d-flex gap-2 mt-3">
-
-    <!-- Back -->
-    <a href="/students/" class="btn btn-secondary btn-sm">
-        Back
-    </a>
-
-    {% if request.user.is_superuser %}
-
-        <!-- Edit -->
-        <a href="/student/{{ student.id }}/edit/" class="btn btn-warning btn-sm">
-            Edit
-        </a>
-
-        <!-- Delete -->
-        <a href="/student/{{ student.id }}/delete/" 
-           class="btn btn-danger btn-sm"
-           onclick="return confirm('Delete this student?');">
-            Delete
-        </a>
-
     {% endif %}
+
+    <div class="d-flex flex-wrap gap-2 mt-4 pt-4 border-top">
+        {% if is_admin or is_faculty %}
+            <a href="{% url 'student_list' %}" class="btn btn-secondary btn-action"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
+        {% else %}
+            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary btn-action"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+        {% endif %}
+
+        <a href="/digilocker/{{ student.id }}/" class="btn btn-warning btn-action text-dark"><i class="bi bi-folder-fill me-1"></i> View DigiLocker</a>
+
+        {% if is_admin %}
+            <a href="/student/{{ student.id }}/edit/" class="btn btn-primary btn-action"><i class="bi bi-pencil-square me-1"></i> Edit Details</a>
+            <a href="/student/{{ student.id }}/delete/" class="btn btn-danger btn-action" onclick="return confirm('Delete this student?');"><i class="bi bi-trash-fill me-1"></i> Delete</a>
+        {% endif %}
+    </div>
 
 </div>
 {% endblock %}

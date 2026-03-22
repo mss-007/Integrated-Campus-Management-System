@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}Advanced Field Settings{% endblock %}
+
+{% block content %}
+<style>
+    /* 🔥 Anti-Congestion Layout Fixes 🔥 */
+    /* Match input height perfectly to button height */
+    .table input.form-control-sm { 
+        height: 32px; 
+        font-size: 13px;
+    }
+    
+    /* Make buttons perfectly square and centered */
+    .btn-icon { 
+        width: 32px; 
+        height: 32px; 
+        padding: 0; 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        border-radius: 6px;
+    }
+
+    /* Force the buttons to stay on one line with a small gap */
+    .action-cell {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    /* Dark Mode Fix for Inputs */
+    body.dark-mode input.form-control-sm {
+        background-color: #0f172a; 
+        color: #f8fafc; 
+        border-color: #334155;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-4 h-100 stagger-item">
+            <h5 class="mb-3 text-primary"><i class="bi bi-people-fill me-2"></i> Student Fields</h5>
+            <form method="POST" class="mb-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_field">
+                <input type="hidden" name="model_type" value="student">
+                <div class="input-group">
+                    <input type="text" name="display_name" class="form-control" placeholder="New Student Field" required>
+                    <button class="btn btn-success"><i class="bi bi-plus-lg me-1"></i> Add</button>
+                </div>
+            </form>
+
+            <table class="table align-middle table-hover">
+                <thead class="table-light"><tr><th style="width: 70%;">Field Label</th><th class="text-end" style="width: 30%;">Actions</th></tr></thead>
+                <tbody>
+                {% for field in student_fields %}
+                <tr>
+                    <td>
+                        <form method="POST" id="update_student_{{ field.id }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_label">
+                            <input type="hidden" name="field_id" value="{{ field.id }}">
+                        </form>
+                        <input type="text" name="display_name" form="update_student_{{ field.id }}" class="form-control form-control-sm" value="{{ field.display_name }}" required>
+                    </td>
+                    <td>
+                        <div class="action-cell">
+                            <button type="submit" form="update_student_{{ field.id }}" class="btn btn-info btn-icon text-white" title="Save">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <form method="POST" class="m-0 p-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_field">
+                                <input type="hidden" name="field_id" value="{{ field.id }}">
+                                <button type="submit" class="btn btn-danger btn-icon" onclick="return confirm('Delete this field?');" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-4 h-100 stagger-item">
+            <h5 class="mb-3 text-primary"><i class="bi bi-person-badge-fill me-2"></i> Faculty Fields</h5>
+            <form method="POST" class="mb-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_field">
+                <input type="hidden" name="model_type" value="faculty">
+                <div class="input-group">
+                    <input type="text" name="display_name" class="form-control" placeholder="New Faculty Field" required>
+                    <button class="btn btn-success"><i class="bi bi-plus-lg me-1"></i> Add</button>
+                </div>
+            </form>
+
+            <table class="table align-middle table-hover">
+                <thead class="table-light"><tr><th style="width: 70%;">Field Label</th><th class="text-end" style="width: 30%;">Actions</th></tr></thead>
+                <tbody>
+                {% for field in faculty_fields %}
+                <tr>
+                    <td>
+                        <form method="POST" id="update_faculty_{{ field.id }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_label">
+                            <input type="hidden" name="field_id" value="{{ field.id }}">
+                        </form>
+                        <input type="text" name="display_name" form="update_faculty_{{ field.id }}" class="form-control form-control-sm" value="{{ field.display_name }}" required>
+                    </td>
+                    <td>
+                        <div class="action-cell">
+                            <button type="submit" form="update_faculty_{{ field.id }}" class="btn btn-info btn-icon text-white" title="Save">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <form method="POST" class="m-0 p-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_field">
+                                <input type="hidden" name="field_id" value="{{ field.id }}">
+                                <button type="submit" class="btn btn-danger btn-icon" onclick="return confirm('Delete this field?');" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card p-4 h-100 stagger-item">
+            <h5 class="mb-3 text-primary"><i class="bi bi-folder-fill me-2"></i> Document Types</h5>
+            <form method="POST" class="mb-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_doc_type">
+                <div class="input-group">
+                    <input type="text" name="display_name" class="form-control" placeholder="e.g. 10th Marksheet" required>
+                    <button class="btn btn-success"><i class="bi bi-plus-lg me-1"></i> Add</button>
+                </div>
+            </form>
+
+            <table class="table align-middle table-hover">
+                <thead class="table-light"><tr><th style="width: 70%;">Document Label</th><th class="text-end" style="width: 30%;">Actions</th></tr></thead>
+                <tbody>
+                {% for field in doc_types %}
+                <tr>
+                    <td>
+                        <form method="POST" id="update_document_{{ field.id }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_doc_label">
+                            <input type="hidden" name="field_id" value="{{ field.id }}">
+                        </form>
+                        <input type="text" name="display_name" form="update_document_{{ field.id }}" class="form-control form-control-sm" value="{{ field.name }}" required>
+                    </td>
+                    <td>
+                        <div class="action-cell">
+                            <button type="submit" form="update_document_{{ field.id }}" class="btn btn-info btn-icon text-white" title="Save">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <form method="POST" class="m-0 p-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_doc_type">
+                                <input type="hidden" name="field_id" value="{{ field.id }}">
+                                <button type="submit" class="btn btn-danger btn-icon" onclick="return confirm('Delete this document type?');" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize standard Bootstrap tooltips
+    document.addEventListener("DOMContentLoaded", function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+{% endblock %}

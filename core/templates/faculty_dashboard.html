@@ -2,35 +2,186 @@
 {% block title %}Faculty Dashboard{% endblock %}
 
 {% block content %}
+<style>
+    /* 🔥 Faculty Dashboard UI Polish 🔥 */
+    .faculty-welcome-card {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border-radius: 24px;
+        padding: 40px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.25);
+    }
 
-<form method="GET" class="mb-3">
-<input name="q" class="form-control" placeholder="Search students">
-</form>
+    /* Glass Effect Decoration */
+    .faculty-welcome-card::before {
+        content: '';
+        position: absolute;
+        bottom: -30px;
+        left: -30px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 40px;
+        transform: rotate(25deg);
+    }
 
-<div class="card p-4">
+    .dept-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
 
-<table class="table table-hover">
+    /* Info Grid Styling */
+    .data-card {
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .info-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
 
-<tr>
-<th>Name</th>
-<th>Department</th>
-<th>Action</th>
-</tr>
+    .info-value {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 12px;
+    }
 
-{% for s in students %}
+    /* Counter Card */
+    .student-counter-card {
+        background: #f8fafc;
+        border: 2px dashed #e2e8f0;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
 
-<tr>
-<td>{{ s.name }}</td>
-<td>{{ s.department }}</td>
-<td>
-<a href="/student/{{ s.id }}" class="btn btn-sm btn-info">View</a>
-</td>
-</tr>
+    .student-counter-card:hover {
+        background: #ffffff;
+        border-color: #10b981;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
 
-{% endfor %}
+    /* 🔥 Dark Mode Adjustments 🔥 */
+    body.dark-mode .faculty-welcome-card {
+        background: linear-gradient(135deg, #064e3b, #065f46);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
 
-</table>
+    body.dark-mode .data-card, 
+    body.dark-mode .student-counter-card {
+        background: #1e293b;
+        border-color: #334155;
+    }
 
+    body.dark-mode .info-value { color: #f8fafc; }
+    body.dark-mode .info-label { color: #94a3b8; }
+    body.dark-mode .student-counter-card:hover { border-color: #34d399; }
+</style>
+
+<div class="faculty-welcome-card mb-4 animate__animated animate__fadeIn">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-inline-block dept-badge mb-3">
+                <i class="bi bi-building me-2"></i>Department of {{ faculty.department }}
+            </div>
+            <h2 class="fw-bold mb-1">Welcome, {{ faculty.name }}</h2>
+            <p class="mb-0 text-white-50">Manage your students and academic records from your central dashboard.</p>
+        </div>
+        <div class="col-md-4 text-md-end d-none d-md-block">
+            <i class="bi bi-person-workspace" style="font-size: 5rem; opacity: 0.3;"></i>
+        </div>
+    </div>
 </div>
 
+<div class="row g-4">
+    <div class="col-lg-7 col-md-6">
+        <div class="card data-card p-4 shadow-sm border-0 h-100">
+            <h5 class="fw-bold mb-4 text-primary d-flex align-items-center">
+                <i class="bi bi-person-lines-fill me-2"></i>Professional Profile
+            </h5>
+            
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">{{ faculty.name }}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="info-label">Designation</div>
+                    <div class="info-value">{{ faculty.designation }}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="info-label">Staff Category</div>
+                    <div class="info-value">{{ faculty.get_staff_type_display }}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="info-label">Current Department</div>
+                    <div class="info-value text-success">{{ faculty.department }}</div>
+                </div>
+            </div>
+
+            {% if extra_data %}
+            <div class="border-top mt-3 pt-4">
+                <h6 class="fw-bold mb-3 small text-uppercase text-muted">Additional Information</h6>
+                <div class="row">
+                    {% for data in extra_data %}
+                    <div class="col-sm-6">
+                        <div class="info-label">{{ data.field.display_name }}</div>
+                        <div class="info-value">{{ data.value|default:"-" }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mt-auto pt-4 border-top">
+                <div class="alert alert-warning mb-0 p-2 border-0 small" style="border-radius: 10px; background: rgba(245, 158, 11, 0.1); color: #b45309;">
+                    <i class="bi bi-info-circle-fill me-2"></i>Profile locked. Contact Admin for changes.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 col-md-6">
+        <div class="student-counter-card p-4 shadow-sm h-100 border-0 d-flex flex-column text-center">
+            <h5 class="fw-bold text-secondary mb-4">Department Strength</h5>
+            
+            <div class="my-auto">
+                <div class="text-muted small fw-bold text-uppercase mb-2">Total Students Under You</div>
+                <h1 class="display-1 fw-bold text-success mb-2">{{ my_students_count }}</h1>
+                <p class="text-muted small">Based on your current department allocation</p>
+            </div>
+
+            <div class="mt-auto">
+                <a href="{% url 'student_list' %}" class="btn btn-success w-100 py-3 fw-bold shadow-sm" style="border-radius: 14px;">
+                    <i class="bi bi-people-fill me-2"></i>Browse Student List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Force Sidebar Greeting to use Faculty Name
+    document.addEventListener("DOMContentLoaded", function() {
+        const greetingElement = document.getElementById("greeting");
+        if (greetingElement) {
+            const timeGreeting = getGreetingData();
+            greetingElement.innerText = `${timeGreeting}, {{ faculty.name|escapejs }}`;
+        }
+    });
+</script>
 {% endblock %}

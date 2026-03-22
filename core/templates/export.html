@@ -2,235 +2,202 @@
 {% block title %}Export Data{% endblock %}
 
 {% block content %}
-
 <div class="export-container">
+    <div class="card export-card">
+        <h3 class="mb-4 text-center fw-bold text-primary" id="exportTitle">📊 Export Data</h3>
 
-<div class="card export-card">
+        <form method="POST" action="{% url 'export_excel' %}">
+            {% csrf_token %}
 
-<h3 class="mb-4 text-center">📊 Export Data</h3>
+            {% if is_admin %}
+            <div class="mb-5 text-center">
+                <label class="form-label fw-bold mb-3 text-secondary">Select Data Type</label><br>
+                <div class="toggle-wrap d-inline-flex p-1 shadow-sm">
+                    <input type="radio" id="student" name="type" value="student" checked onclick="toggleFields('student')">
+                    <label for="student"><i class="bi bi-mortarboard-fill me-2"></i>Student</label>
+                    <input type="radio" id="faculty" name="type" value="faculty" onclick="toggleFields('faculty')">
+                    <label for="faculty"><i class="bi bi-person-workspace me-2"></i>Faculty</label>
+                </div>
+            </div>
+            {% elif is_faculty %}
+            <div class="alert alert-info text-center mb-4 faculty-alert shadow-sm" style="border-radius: 12px; border: none;">
+                <i class="bi bi-info-circle-fill me-2"></i> You are exporting student records for the <strong>{{ request.user.faculty.department }}</strong> department.
+                <input type="hidden" name="type" value="student">
+            </div>
+            {% endif %}
 
-<form method="POST" action="/export-excel/">
-{% csrf_token %}
+            <div id="studentFields" class="animate__animated animate__fadeIn">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="mb-0 fw-bold text-secondary"><i class="bi bi-ui-checks-grid me-2"></i>Student Fields</h5>
+                    <div class="form-check form-switch select-all-wrapper">
+                        <input class="form-check-input" type="checkbox" id="selectAllStudent" onclick="selectAll('studentFields', this)">
+                        <label class="form-check-label fw-bold" for="selectAllStudent" style="cursor:pointer; user-select:none;">Select All</label>
+                    </div>
+                </div>
+                <div class="row g-2 mt-2">
+                    {% for field in student_fields %}
+                    <div class="col-md-4 col-sm-6 field-box">
+                        <input type="checkbox" id="sf_{{ field.internal_name }}" name="fields" value="{{ field.internal_name }}">
+                        <label for="sf_{{ field.internal_name }}">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <span>{% if not field.is_static %}<i class="bi bi-star-fill text-warning me-1 small"></i>{% endif %}{{ field.display_name }}</span>
+                                <i class="bi bi-check-circle-fill check-icon"></i>
+                            </div>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-<!-- 🔥 TYPE SWITCH -->
-<div class="mb-4 text-center">
-<label class="form-label">Select Data Type</label>
+            {% if is_admin %}
+            <div id="facultyFields" style="display:none;" class="animate__animated animate__fadeIn">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="mb-0 fw-bold text-secondary"><i class="bi bi-ui-checks-grid me-2"></i>Faculty Fields</h5>
+                    <div class="form-check form-switch select-all-wrapper">
+                        <input class="form-check-input" type="checkbox" id="selectAllFaculty" onclick="selectAll('facultyFields', this)">
+                        <label class="form-check-label fw-bold" for="selectAllFaculty" style="cursor:pointer; user-select:none;">Select All</label>
+                    </div>
+                </div>
+                <div class="row g-2 mt-2">
+                    {% for field in faculty_fields %}
+                    <div class="col-md-4 col-sm-6 field-box">
+                        <input type="checkbox" id="ff_{{ field.internal_name }}" name="fields" value="{{ field.internal_name }}">
+                        <label for="ff_{{ field.internal_name }}">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <span>{% if not field.is_static %}<i class="bi bi-star-fill text-warning me-1 small"></i>{% endif %}{{ field.display_name }}</span>
+                                <i class="bi bi-check-circle-fill check-icon"></i>
+                            </div>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-<div class="toggle-wrap">
-    <input type="radio" id="student" name="type" value="student" checked onclick="toggleFields('student')">
-    <label for="student">Student</label>
+            <div class="mt-5 p-4 rounded-3 filter-box bg-light border">
+                <label class="fw-bold mb-2 text-secondary"><i class="bi bi-funnel-fill me-2"></i>Filter by Department (Optional)</label>
+                <select name="department" class="form-select border-0 shadow-sm" style="border-radius: 10px; padding: 10px 15px;">
+                    <option value="All">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}">{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
 
-    <input type="radio" id="faculty" name="type" value="faculty" onclick="toggleFields('faculty')">
-    <label for="faculty">Faculty</label>
-</div>
-</div>
-
-<!-- 🎯 DEPARTMENT -->
-<div class="mb-4">
-<label class="form-label left-label">Department</label>
-
-<select name="department" class="form-control centered-input">
-    <option value="">All</option>
-    {% for dept in departments %}
-        <option value="{{ dept }}">{{ dept }}</option>
-    {% endfor %}
-</select>
-</div>
-
-<!-- 🎓 STUDENT FIELDS -->
-<div id="studentFields">
-
-<div class="d-flex justify-between align-center">
-<h5>Student Fields</h5>
-
-<label class="select-all">
-<input type="checkbox" onclick="selectAll('studentFields', this)">
-Select All
-</label>
-</div>
-
-<div class="row">
-    {% for field in student_fields %}
-    <div class="col-md-4 field-box">
-        <input type="checkbox" name="fields" value="{{ field }}">
-        <label>{{ field|title }}</label>
+            <button class="btn btn-primary btn-lg w-100 mt-4 shadow-sm fw-bold" style="border-radius: 12px; padding: 12px;">
+                <i class="bi bi-cloud-arrow-down-fill me-2"></i> Download Excel
+            </button>
+        </form>
     </div>
-    {% endfor %}
 </div>
 
-</div>
-
-<!-- 👨‍🏫 FACULTY FIELDS -->
-<div id="facultyFields" style="display:none;">
-
-<div class="d-flex justify-between align-center">
-<h5>Faculty Fields</h5>
-
-<label class="select-all">
-<input type="checkbox" onclick="selectAll('facultyFields', this)">
-Select All
-</label>
-</div>
-
-<div class="row">
-    {% for field in faculty_fields %}
-    <div class="col-md-4 field-box">
-        <input type="checkbox" name="fields" value="{{ field }}">
-        <label>{{ field|title }}</label>
-    </div>
-    {% endfor %}
-</div>
-
-</div>
-
-<button class="btn btn-success w-100 mt-4">
-    Download Excel 📥
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-<!-- 🎨 STYLES -->
 <style>
+.export-container { display:flex; justify-content:center; }
+.export-card { width:100%; max-width:850px; border-radius:24px; padding:40px; background:#ffffff; box-shadow:0 15px 35px rgba(0,0,0,0.05); transition: background 0.4s ease, box-shadow 0.4s ease; }
+#exportTitle { transition: color 0.4s ease; }
 
-.export-container{
-    display:flex;
-    justify-content:center;
+/* Top Radio Toggle Styling */
+.toggle-wrap { background: #f1f5f9; border-radius: 30px; }
+.toggle-wrap input { display:none; }
+.toggle-wrap label { padding: 10px 24px; border-radius: 25px; color: #64748b; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin: 0; }
+.toggle-wrap label:hover { color: #0f172a; }
+.toggle-wrap input:checked + label { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transform: translateY(-1px); }
+
+/* 🔥 POLISHED CHECKBOX CARDS 🔥 */
+.field-box { margin-bottom: 8px; }
+.field-box input[type="checkbox"] { display: none; } /* Hide the default checkbox completely */
+.field-box label {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    cursor: pointer;
+    background: #ffffff;
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.field-box label .check-icon { font-size: 1.1rem; opacity: 0; color: #3b82f6; transition: opacity 0.2s, transform 0.2s; transform: scale(0.5); }
+.field-box label:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); }
+
+/* Selected State */
+.field-box input[type="checkbox"]:checked + label {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1e3a8a;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
+}
+.field-box input[type="checkbox"]:checked + label .check-icon { opacity: 1; transform: scale(1); }
+
+.select-all-wrapper .form-check-input { cursor: pointer; width: 2.5em; height: 1.25em; }
+
+/* 🔥 DARK MODE COMPATIBILITY 🔥 */
+body.dark-mode .export-card { background: #1e293b; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+body.dark-mode #exportTitle { color: #f8fafc !important; }
+body.dark-mode .text-secondary { color: #94a3b8 !important; }
+body.dark-mode .border-bottom { border-color: #334155 !important; }
+
+/* Dark Mode Radio Toggle */
+body.dark-mode .toggle-wrap { background: #0f172a; }
+body.dark-mode .toggle-wrap label { color: #94a3b8; }
+body.dark-mode .toggle-wrap label:hover { color: #f8fafc; }
+body.dark-mode .toggle-wrap input:checked + label { background: #2563eb; color: white; }
+
+/* Dark Mode Checkbox Cards */
+body.dark-mode .field-box label {
+    background: #334155;
+    border-color: #475569;
+    color: #cbd5e1;
+}
+body.dark-mode .field-box label:hover { border-color: #64748b; background: #3f516a; }
+body.dark-mode .field-box input[type="checkbox"]:checked + label {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Card */
-.export-card{
-    width:100%;
-    max-width:700px;
-    border-radius:18px;
-    padding:30px;
-    background:rgba(255,255,255,0.9);
-    backdrop-filter:blur(10px);
-}
+body.dark-mode .filter-box { background: #0f172a !important; border-color: #334155 !important; }
+body.dark-mode select.form-select { background-color: #1e293b; color: #f8fafc; border: 1px solid #475569; }
 
-/* 🔥 Label left */
-.left-label{
-    display:block;
-    text-align:left;
-    font-weight:600;
-    margin-bottom:6px;
-}
-
-/* 🔥 Dropdown centered but text left */
-.centered-input{
-    max-width:300px;
-    margin:0 auto;
-    text-align:left;
-    border-radius:10px;
-    transition:0.3s;
-}
-
-/* force option text left */
-.centered-input option{
-    text-align:left;
-}
-
-/* ✨ Glow */
-.centered-input{
-    box-shadow:0 0 6px rgba(37, 99, 235, 0.2);
-}
-
-.centered-input:focus{
-    outline:none;
-    border-color:#2563eb;
-    box-shadow:0 0 10px rgba(37, 99, 235, 0.6);
-}
-
-/* Toggle */
-.toggle-wrap{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-}
-
-.toggle-wrap input{
-    display:none;
-}
-
-.toggle-wrap label{
-    padding:8px 18px;
-    border-radius:20px;
-    background:#e2e8f0;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-.toggle-wrap input:checked + label{
-    background:#2563eb;
-    color:white;
-}
-
-/* Field boxes */
-.field-box {
-    margin-bottom: 10px;
-}
-
-.field-box input {
-    margin-right: 6px;
-}
-
-/* Layout helpers */
-.d-flex{
-    display:flex;
-}
-
-.justify-between{
-    justify-content:space-between;
-}
-
-.align-center{
-    align-items:center;
-}
-
-/* Select all */
-.select-all{
-    font-size:14px;
-    cursor:pointer;
-}
-
+body.dark-mode .faculty-alert { background: rgba(14, 165, 233, 0.15) !important; color: #38bdf8 !important; }
 </style>
 
-<!-- 🔥 SCRIPT -->
 <script>
-
 function toggleFields(type){
-
-    document.getElementById("studentFields").style.display =
-        type === "student" ? "block" : "none";
-
-    document.getElementById("facultyFields").style.display =
-        type === "faculty" ? "block" : "none";
-
-    // clear all checkboxes
-    document.querySelectorAll('input[name="fields"]').forEach(cb => {
-        cb.checked = false;
-    });
-
-    // reset select all
-    document.querySelectorAll('.select-all input').forEach(cb => {
-        cb.checked = false;
-    });
+    let studentSection = document.getElementById("studentFields");
+    let facultySection = document.getElementById("facultyFields");
+    
+    if (studentSection) {
+        studentSection.style.display = type === "student" ? "block" : "none";
+        // Reset animation on toggle
+        studentSection.classList.remove("animate__fadeIn");
+        void studentSection.offsetWidth; 
+        studentSection.classList.add("animate__fadeIn");
+    }
+    
+    if (facultySection) {
+        facultySection.style.display = type === "faculty" ? "block" : "none";
+        // Reset animation on toggle
+        facultySection.classList.remove("animate__fadeIn");
+        void facultySection.offsetWidth; 
+        facultySection.classList.add("animate__fadeIn");
+    }
+    
+    // Clear all selections when switching tabs to prevent accidental mixed data exports
+    document.querySelectorAll('input[name="fields"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.select-all-wrapper input').forEach(cb => cb.checked = false);
 }
 
-// 🔥 SELECT ALL
 function selectAll(sectionId, source){
-
     let section = document.getElementById(sectionId);
-    let checkboxes = section.querySelectorAll('input[name="fields"]');
-
-    checkboxes.forEach(cb => {
-        cb.checked = source.checked;
-    });
+    if(section){
+        let checkboxes = section.querySelectorAll('input[name="fields"]');
+        checkboxes.forEach(cb => { cb.checked = source.checked; });
+    }
 }
-
 </script>
-
 {% endblock %}

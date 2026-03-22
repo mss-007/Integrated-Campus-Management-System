@@ -2,71 +2,140 @@
 {% block title %}Faculty Management{% endblock %}
 
 {% block content %}
+<style>
+    /* 🔥 Dark Mode Fixes for Tables & General 🔥 */
+    body.dark-mode .card { background-color: #1e293b; border-color: #334155; }
+    body.dark-mode .table { color: #f8fafc; }
+    body.dark-mode .table-light th { background-color: #0f172a; color: #94a3b8; border-bottom: 2px solid #334155; border-top: none; }
+    body.dark-mode td { border-bottom-color: #334155; }
+    body.dark-mode .table-hover tbody tr:hover td { background-color: rgba(51, 65, 85, 0.5); color: #f8fafc; }
+    body.dark-mode .text-muted { color: #94a3b8 !important; }
 
-<!-- ➕ ADD BUTTON -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Faculty Management</h4>
+    /* 🔥 Polished Custom Search Bar 🔥 */
+    .search-wrapper {
+        display: flex;
+        align-items: center;
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .search-wrapper:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
 
-    <a href="{% url 'add_faculty' %}" class="btn btn-primary">
-        ➕ Add Faculty
+    .search-icon {
+        padding: 0 16px;
+        color: #94a3b8;
+        font-size: 1.1rem;
+        display: flex;
+    }
+
+    .search-input {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 12px 0;
+        font-size: 1rem;
+        flex-grow: 1;
+    }
+
+    .clear-btn {
+        padding: 0 16px;
+        color: #cbd5e1;
+        font-size: 1.2rem;
+        display: flex;
+        transition: color 0.2s ease;
+    }
+    
+    .clear-btn:hover { color: #ef4444; } /* Turns red on hover */
+
+    .search-btn {
+        border-radius: 0;
+        padding: 12px 28px;
+        font-weight: 600;
+        height: 100%;
+    }
+
+    /* Search Bar Dark Mode */
+    body.dark-mode .search-wrapper { background-color: #0f172a; border-color: #334155; }
+    body.dark-mode .search-input { color: #f8fafc; }
+    body.dark-mode .search-wrapper:focus-within { border-color: #3b82f6; }
+    body.dark-mode .clear-btn { color: #475569; }
+    body.dark-mode .clear-btn:hover { color: #f87171; }
+
+    /* Table Typography */
+    .table th { font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+    .action-btn { border-radius: 6px; padding: 5px 12px; font-weight: 600; font-size: 0.85rem; }
+    .empty-state-icon { font-size: 3rem; color: #cbd5e1; margin-bottom: 10px; }
+    body.dark-mode .empty-state-icon { color: #475569; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 text-primary fw-bold"><i class="bi bi-person-workspace me-2"></i>Faculty Management</h3>
+    <a href="{% url 'add_faculty' %}" class="btn btn-primary fw-bold px-3 shadow-sm" style="border-radius: 8px;">
+        <i class="bi bi-plus-lg me-1"></i> Add Faculty
     </a>
 </div>
 
-<div class="card p-4">
-<form method="GET" class="mb-3">
+<div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
+    
+    <form method="GET" class="mb-4">
+        <div class="search-wrapper shadow-sm">
+            <div class="search-icon">
+                <i class="bi bi-search"></i>
+            </div>
+            
+            <input type="text" name="q" class="form-control search-input"
+                   placeholder="Search faculty by name, department, or designation..."
+                   value="{{ request.GET.q }}">
+            
+            {% if request.GET.q %}
+            <a href="{% url 'faculty_list' %}" class="clear-btn text-decoration-none" title="Clear Search">
+                <i class="bi bi-x-circle-fill"></i>
+            </a>
+            {% endif %}
+            
+            <button class="btn btn-primary search-btn" type="submit">Search</button>
+        </div>
+    </form>
 
-<div class="input-group">
-<input type="text" name="q" class="form-control"
-placeholder="Search faculty..."
-value="{{ request.GET.q }}">
-
-<button class="btn btn-primary">🔍</button>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Name</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th class="text-end pe-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in faculty %}
+                <tr>
+                    <td class="ps-3 fw-medium">{{ f.name }}</td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">{{ f.department }}</span></td>
+                    <td>{{ f.designation }}</td>
+                    <td class="text-end pe-3">
+                        <a href="{% url 'faculty_view' f.id %}" class="btn btn-info text-white action-btn shadow-sm">
+                            <i class="bi bi-eye-fill me-1"></i> View
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5">
+                        <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+                        <h5 class="text-muted fw-bold mb-1">No faculty found</h5>
+                        <p class="text-muted small mb-0">Try adjusting your search or add a new faculty member.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
-</form>
-<table class="table table-hover align-middle">
-
-<thead class="table-light">
-<tr>
-<th>Name</th>
-<th>Department</th>
-<th>Designation</th>
-<th class="text-end">Action</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for f in faculty %}
-<tr>
-<td>{{ f.name }}</td>
-<td>{{ f.department }}</td>
-<td>{{ f.designation }}</td>
-
-<td class="text-end">
-
-    <!-- 👁️ VIEW -->
-    <a href="{% url 'faculty_view' f.id %}" 
-       class="btn btn-sm btn-info">
-       View
-    </a>
-
-</td>
-
-</tr>
-
-{% empty %}
-<tr>
-<td colspan="4" class="text-center text-muted">
-No faculty found
-</td>
-</tr>
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
 {% endblock %}

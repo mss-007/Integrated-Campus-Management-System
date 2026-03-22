@@ -2,126 +2,119 @@
 {% block title %}Departments{% endblock %}
 
 {% block content %}
-
-<div class="card dept-card p-4">
-
-<h4 class="mb-4">📊 Departments Overview</h4>
-
-<table class="table table-hover align-middle">
-
-<thead class="table-light">
-<tr>
-<th>Department</th>
-<th class="text-center">Total Students</th>
-<th class="text-center">Boys</th>
-<th class="text-center">Girls</th>
-<th class="text-center">Faculty</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for d in departments %}
-
-<tr>
-
-<td class="fw-semibold">
-    {{ d.name }}
-</td>
-
-<td class="text-center">
-    <a href="/students/?dept={{ d.name }}" class="btn stat-btn btn-primary">
-        {{ d.total_students }}
-    </a>
-</td>
-
-<td class="text-center">
-    <a href="/students/?dept={{ d.name }}&gender=male" class="btn stat-btn btn-info">
-        {{ d.boys }}
-    </a>
-</td>
-
-<td class="text-center">
-    <a href="/students/?dept={{ d.name }}&gender=female" class="btn stat-btn btn-pink">
-        {{ d.girls }}
-    </a>
-</td>
-
-<td class="text-center">
-    <a href="/faculty/?dept={{ d.name }}" class="btn stat-btn btn-dark">
-        {{ d.faculty }}
-    </a>
-</td>
-
-</tr>
-
-{% empty %}
-
-<tr>
-<td colspan="5" class="text-center text-muted py-4">
-    No departments found 😐
-</td>
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-<!-- 🎨 STYLES -->
 <style>
+    /* 🔥 Dark Mode Fixes for Tables & General 🔥 */
+    body.dark-mode .card { background-color: #1e293b; border-color: #334155 !important; }
+    body.dark-mode .table { color: #f8fafc; }
+    body.dark-mode .table-light th { background-color: #0f172a; color: #94a3b8; border-bottom: 2px solid #334155; border-top: none; }
+    body.dark-mode td { border-bottom-color: #334155; }
+    body.dark-mode .table-hover tbody tr:hover td { background-color: rgba(51, 65, 85, 0.5); color: #f8fafc; }
+    body.dark-mode .text-muted { color: #94a3b8 !important; }
 
-/* Card polish */
-.dept-card{
-    border-radius:18px;
-    background:rgba(255,255,255,0.95);
-    backdrop-filter:blur(8px);
-}
+    /* Dark Mode Buttons */
+    body.dark-mode .btn-pink { background: #be185d; }
+    body.dark-mode .btn-pink:hover { background: #9d174d; }
+    body.dark-mode .btn-dark { background: #334155; border-color: #475569; }
+    body.dark-mode .btn-dark:hover { background: #475569; }
+    body.dark-mode .empty-state-icon { color: #475569; }
 
-/* Buttons */
-.stat-btn{
-    min-width:55px;
-    border-radius:10px;
-    font-weight:600;
-    transition:0.2s;
-}
+    /* Polished UI Touches */
+    .table th { font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+    
+    /* Sleek Stat Buttons */
+    .stat-btn {
+        min-width: 65px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 6px 12px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .stat-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
 
-/* Hover pop */
-.stat-btn:hover{
-    transform:scale(1.08);
-}
+    /* Custom Pink Button */
+    .btn-pink {
+        background: #ec4899;
+        color: white;
+        border: none;
+    }
+    .btn-pink:hover {
+        background: #db2777;
+        color: white;
+    }
 
-/* Pink button (because Bootstrap forgot girls exist) */
-.btn-pink{
-    background:#ec4899;
-    color:white;
-    border:none;
-}
-
-.btn-pink:hover{
-    background:#db2777;
-}
-
-/* Table polish */
-table td{
-    vertical-align:middle;
-}
-
-/* Header */
-thead th{
-    font-weight:600;
-    font-size:14px;
-}
-
-/* Row hover glow */
-.table-hover tbody tr:hover{
-    background:#f1f5ff;
-    transition:0.2s;
-}
-
+    .empty-state-icon { font-size: 3.5rem; color: #cbd5e1; margin-bottom: 12px; }
 </style>
 
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 text-primary fw-bold"><i class="bi bi-building-fill me-2"></i>Departments Overview</h3>
+</div>
+
+<div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Department Name</th>
+                    <th class="text-center"><i class="bi bi-people-fill me-1"></i> Total Students</th>
+                    <th class="text-center"><i class="bi bi-gender-male me-1"></i> Boys</th>
+                    <th class="text-center"><i class="bi bi-gender-female me-1"></i> Girls</th>
+                    <th class="text-center pe-3"><i class="bi bi-person-workspace me-1"></i> Faculty</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for d in departments %}
+                <tr>
+                    <td class="ps-3 fw-semibold">
+                        <i class="bi bi-building text-muted me-2 fs-5 align-middle"></i>
+                        {{ d.name }}
+                    </td>
+
+                    <td class="text-center">
+                        <a href="/students/?dept={{ d.name }}" class="btn stat-btn btn-primary shadow-sm" title="View All Students">
+                            {{ d.total_students }}
+                        </a>
+                    </td>
+
+                    <td class="text-center">
+                        <a href="/students/?dept={{ d.name }}&gender=male" class="btn stat-btn btn-info text-white shadow-sm" title="View Male Students">
+                            {{ d.boys }}
+                        </a>
+                    </td>
+
+                    <td class="text-center">
+                        <a href="/students/?dept={{ d.name }}&gender=female" class="btn stat-btn btn-pink shadow-sm" title="View Female Students">
+                            {{ d.girls }}
+                        </a>
+                    </td>
+
+                    <td class="text-center pe-3">
+                        <a href="/faculty/?dept={{ d.name }}" class="btn stat-btn btn-dark shadow-sm" title="View Faculty">
+                            {{ d.faculty }}
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <div class="empty-state-icon"><i class="bi bi-building-x"></i></div>
+                        <h5 class="text-muted fw-bold mb-1">No departments found</h5>
+                        <p class="text-muted small mb-0">No department data is currently available in the system.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
 {% endblock %}
