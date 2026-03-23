@@ -3,70 +3,361 @@
 
 {% block content %}
 <style>
-    /* 🔥 Fix Chrome Autofill Yellow/Beige Background in Dark Mode 🔥 */
-    body.dark-mode input:-webkit-autofill,
-    body.dark-mode input:-webkit-autofill:hover, 
-    body.dark-mode input:-webkit-autofill:focus, 
-    body.dark-mode input:-webkit-autofill:active,
-    body.dark-mode select:-webkit-autofill,
-    body.dark-mode textarea:-webkit-autofill {
-        -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
-        -webkit-text-fill-color: #f8fafc !important;
-        transition: background-color 5000s ease-in-out 0s;
-    }
-
-    /* Ensure dropdown options turn dark */
-    body.dark-mode select.form-select option {
-        background-color: #0f172a;
-        color: #f8fafc;
-    }
+    /* 🔥 Dark Mode Fixes for Form Inputs & Dropdowns 🔥 */
+    body.dark-mode input.form-control { background-color: #0f172a; color: #f8fafc; border-color: #334155; }
+    body.dark-mode input.form-control:focus { background-color: #0f172a; color: #ffffff; border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25); }
+    body.dark-mode select.form-select { background-color: #0f172a; color: #f8fafc; border-color: #334155; }
+    body.dark-mode select.form-select:focus { background-color: #0f172a; color: #ffffff; border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25); }
+    body.dark-mode select.form-select option, body.dark-mode select.form-control option { background-color: #0f172a; color: #f8fafc; }
+    body.dark-mode label { color: #cbd5e1; font-weight: 500; }
 </style>
 
-<div class="card p-4">
-<h3 class="mb-4">Edit Student Details</h3>
-<form method="POST">
-{% csrf_token %}
-<div class="row">
+<div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
+    <h4 class="mb-4 text-primary fw-bold">
+        <i class="bi bi-person-lines-fill me-2"></i>Edit Profile: {{ student.first_name }} {{ student.last_name }}
+    </h4>
+    
+    <form method="POST" id="studentEditForm" autocomplete="off">
+    {% csrf_token %}
+    
+    <h5 class="mb-3 text-primary border-bottom pb-2">Personal Details</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">First Name *</label>
+            <input type="text" name="first_name" class="form-control" value="{{ student.first_name|default_if_none:'' }}" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Last Name *</label>
+            <input type="text" name="last_name" class="form-control" value="{{ student.last_name|default_if_none:'' }}" required>
+        </div>
 
-{% if 'name' in labels %}<div class="col-md-6"><label>{{ labels.name }}</label><input name="name" class="form-control mb-2" value="{{ student.name|default_if_none:'' }}"></div>{% endif %}
-{% if 'roll_no' in labels %}<div class="col-md-6"><label>{{ labels.roll_no }}</label><input name="roll_no" class="form-control mb-2" value="{{ student.roll_no|default_if_none:'' }}"></div>{% endif %}
-{% if 'department' in labels %}<div class="col-md-6"><label>{{ labels.department }}</label><input name="department" class="form-control mb-2" value="{{ student.department|default_if_none:'' }}"></div>{% endif %}
-{% if 'admission_year' in labels %}<div class="col-md-6"><label>{{ labels.admission_year }}</label><input name="admission_year" class="form-control mb-2" value="{{ student.admission_year|default_if_none:'' }}"></div>{% endif %}
+        <div class="col-md-4">
+            <label class="form-label">Roll No *</label>
+            <input type="text" name="roll_no" class="form-control" value="{{ student.roll_no|default_if_none:'' }}" 
+                   pattern="^[0-9]{2}-[A-Za-z]+-[0-9]{2,3}$" 
+                   title="Format must be exactly like 23-CS-07" 
+                   placeholder="e.g. 23-CS-07" required>
+        </div>
 
-{% if 'dob' in labels %}<div class="col-md-6"><label>{{ labels.dob }}</label><input type="date" name="dob" class="form-control mb-2" value="{{ student.dob|date:'Y-m-d' }}"></div>{% endif %}
-{% if 'gender' in labels %}<div class="col-md-6"><label>{{ labels.gender }}</label><select name="gender" class="form-select mb-2"><option value="">Select</option><option value="Male" {% if student.gender == "Male" %}selected{% endif %}>Male</option><option value="Female" {% if student.gender == "Female" %}selected{% endif %}>Female</option></select></div>{% endif %}
-{% if 'blood_group' in labels %}<div class="col-md-6"><label>{{ labels.blood_group }}</label><input name="blood_group" class="form-control mb-2" value="{{ student.blood_group|default_if_none:'' }}"></div>{% endif %}
-{% if 'religion' in labels %}<div class="col-md-6"><label>{{ labels.religion }}</label><input name="religion" class="form-control mb-2" value="{{ student.religion|default_if_none:'' }}"></div>{% endif %}
-{% if 'category' in labels %}<div class="col-md-6"><label>{{ labels.category }}</label><input name="category" class="form-control mb-2" value="{{ student.category|default_if_none:'' }}"></div>{% endif %}
-{% if 'aadhaar' in labels %}<div class="col-md-6"><label>{{ labels.aadhaar }}</label><input name="aadhaar" class="form-control mb-2" value="{{ student.aadhaar|default_if_none:'' }}"></div>{% endif %}
-{% if 'physically_challenged' in labels %}<div class="col-md-6"><label>{{ labels.physically_challenged }}</label><select name="physically_challenged" class="form-select mb-2"><option value="False" {% if not student.physically_challenged %}selected{% endif %}>No</option><option value="True" {% if student.physically_challenged %}selected{% endif %}>Yes</option></select></div>{% endif %}
+        <div class="col-md-8">
+            <label class="form-label">Department *</label>
+            <select name="department" id="departmentSelect" class="form-select" onchange="toggleDepartment()" required>
+                <option value="">Select Department</option>
+                
+                <optgroup label="Aided - UG">
+                    <option value="B.A. History (Aided)" {% if student.department == 'B.A. History (Aided)' %}selected{% endif %}>B.A. History (Aided)</option>
+                    <option value="B.A. Economics (Aided)" {% if student.department == 'B.A. Economics (Aided)' %}selected{% endif %}>B.A. Economics (Aided)</option>
+                    <option value="B.A. English Literature (Aided)" {% if student.department == 'B.A. English Literature (Aided)' %}selected{% endif %}>B.A. English Literature (Aided)</option>
+                    <option value="B.Sc. Mathematics (Aided)" {% if student.department == 'B.Sc. Mathematics (Aided)' %}selected{% endif %}>B.Sc. Mathematics (Aided)</option>
+                    <option value="B.Sc. Physics (Aided)" {% if student.department == 'B.Sc. Physics (Aided)' %}selected{% endif %}>B.Sc. Physics (Aided)</option>
+                    <option value="B.Sc. Chemistry (Aided)" {% if student.department == 'B.Sc. Chemistry (Aided)' %}selected{% endif %}>B.Sc. Chemistry (Aided)</option>
+                    <option value="B.Sc. Botany (Aided)" {% if student.department == 'B.Sc. Botany (Aided)' %}selected{% endif %}>B.Sc. Botany (Aided)</option>
+                    <option value="B.Sc. Zoology (Aided)" {% if student.department == 'B.Sc. Zoology (Aided)' %}selected{% endif %}>B.Sc. Zoology (Aided)</option>
+                    <option value="B.Sc. Computer Science (Aided)" {% if student.department == 'B.Sc. Computer Science (Aided)' %}selected{% endif %}>B.Sc. Computer Science (Aided)</option>
+                    <option value="B.Com. (Aided)" {% if student.department == 'B.Com. (Aided)' %}selected{% endif %}>B.Com. (Aided)</option>
+                </optgroup>
 
-{% if 'phone' in labels %}<div class="col-md-6"><label>{{ labels.phone }}</label><input name="phone" class="form-control mb-2" value="{{ student.phone|default_if_none:'' }}"></div>{% endif %}
-{% if 'email' in labels %}<div class="col-md-6"><label>{{ labels.email }}</label><input name="email" class="form-control mb-2" value="{{ student.email|default_if_none:'' }}"></div>{% endif %}
-{% if 'permanent_address' in labels %}<div class="col-md-12"><label>{{ labels.permanent_address }}</label><textarea name="permanent_address" class="form-control mb-2">{{ student.permanent_address|default_if_none:'' }}</textarea></div>{% endif %}
+                <optgroup label="Aided - PG">
+                    <option value="M.A. Tamil Language and Literature (Aided)" {% if student.department == 'M.A. Tamil Language and Literature (Aided)' %}selected{% endif %}>M.A. Tamil Language and Literature (Aided)</option>
+                    <option value="M.Sc. Mathematics (Aided)" {% if student.department == 'M.Sc. Mathematics (Aided)' %}selected{% endif %}>M.Sc. Mathematics (Aided)</option>
+                    <option value="M.Com. (Aided)" {% if student.department == 'M.Com. (Aided)' %}selected{% endif %}>M.Com. (Aided)</option>
+                </optgroup>
 
-{% if 'father_name' in labels %}<div class="col-md-6"><label>{{ labels.father_name }}</label><input name="father_name" class="form-control mb-2" value="{{ student.father_name|default_if_none:'' }}"></div>{% endif %}
-{% if 'mother_name' in labels %}<div class="col-md-6"><label>{{ labels.mother_name }}</label><input name="mother_name" class="form-control mb-2" value="{{ student.mother_name|default_if_none:'' }}"></div>{% endif %}
-{% if 'father_occupation' in labels %}<div class="col-md-6"><label>{{ labels.father_occupation }}</label><input name="father_occupation" class="form-control mb-2" value="{{ student.father_occupation|default_if_none:'' }}"></div>{% endif %}
-{% if 'mother_occupation' in labels %}<div class="col-md-6"><label>{{ labels.mother_occupation }}</label><input name="mother_occupation" class="form-control mb-2" value="{{ student.mother_occupation|default_if_none:'' }}"></div>{% endif %}
-{% if 'father_phone' in labels %}<div class="col-md-6"><label>{{ labels.father_phone }}</label><input name="father_phone" class="form-control mb-2" value="{{ student.father_phone|default_if_none:'' }}"></div>{% endif %}
-{% if 'mother_phone' in labels %}<div class="col-md-6"><label>{{ labels.mother_phone }}</label><input name="mother_phone" class="form-control mb-2" value="{{ student.mother_phone|default_if_none:'' }}"></div>{% endif %}
+                <optgroup label="Self-Financing - UG">
+                    <option value="B.A. Tamil Language and Literature (SF)" {% if student.department == 'B.A. Tamil Language and Literature (SF)' %}selected{% endif %}>B.A. Tamil Language and Literature (SF)</option>
+                    <option value="B.A. English Literature (SF)" {% if student.department == 'B.A. English Literature (SF)' %}selected{% endif %}>B.A. English Literature (SF)</option>
+                    <option value="B.Sc. Mathematics (SF)" {% if student.department == 'B.Sc. Mathematics (SF)' %}selected{% endif %}>B.Sc. Mathematics (SF)</option>
+                    <option value="B.Sc. Physics (SF)" {% if student.department == 'B.Sc. Physics (SF)' %}selected{% endif %}>B.Sc. Physics (SF)</option>
+                    <option value="B.Sc. Chemistry (SF)" {% if student.department == 'B.Sc. Chemistry (SF)' %}selected{% endif %}>B.Sc. Chemistry (SF)</option>
+                    <option value="B.Sc. Botany (SF)" {% if student.department == 'B.Sc. Botany (SF)' %}selected{% endif %}>B.Sc. Botany (SF)</option>
+                    <option value="B.Sc. Computer Science (SF)" {% if student.department == 'B.Sc. Computer Science (SF)' %}selected{% endif %}>B.Sc. Computer Science (SF)</option>
+                    <option value="B.C.A. (SF)" {% if student.department == 'B.C.A. (SF)' %}selected{% endif %}>B.C.A. (SF)</option>
+                    <option value="B.Sc. Information Technology (SF)" {% if student.department == 'B.Sc. Information Technology (SF)' %}selected{% endif %}>B.Sc. Information Technology (SF)</option>
+                    <option value="B.Sc. Computer Technology (SF)" {% if student.department == 'B.Sc. Computer Technology (SF)' %}selected{% endif %}>B.Sc. Computer Technology (SF)</option>
+                    <option value="B.Sc. Data Science (SF)" {% if student.department == 'B.Sc. Data Science (SF)' %}selected{% endif %}>B.Sc. Data Science (SF)</option>
+                    <option value="B.Sc. Artificial Intelligence & Machine Learning (SF)" {% if student.department == 'B.Sc. Artificial Intelligence & Machine Learning (SF)' %}selected{% endif %}>B.Sc. Artificial Intelligence & Machine Learning (SF)</option>
+                    <option value="B.Com. (SF)" {% if student.department == 'B.Com. (SF)' %}selected{% endif %}>B.Com. (SF)</option>
+                    <option value="B.Com. (Computer Applications) (SF)" {% if student.department == 'B.Com. (Computer Applications) (SF)' %}selected{% endif %}>B.Com. (Computer Applications) (SF)</option>
+                    <option value="B.Com. (Corporate Secretaryship) (SF)" {% if student.department == 'B.Com. (Corporate Secretaryship) (SF)' %}selected{% endif %}>B.Com. (Corporate Secretaryship) (SF)</option>
+                    <option value="B.Com. (E-Commerce) (SF)" {% if student.department == 'B.Com. (E-Commerce) (SF)' %}selected{% endif %}>B.Com. (E-Commerce) (SF)</option>
+                    <option value="B.Com. (Finance) (SF)" {% if student.department == 'B.Com. (Finance) (SF)' %}selected{% endif %}>B.Com. (Finance) (SF)</option>
+                    <option value="B.Com. (Banking and Insurance) (SF)" {% if student.department == 'B.Com. (Banking and Insurance) (SF)' %}selected{% endif %}>B.Com. (Banking and Insurance) (SF)</option>
+                    <option value="B.Com. (Professional Accounting) (SF)" {% if student.department == 'B.Com. (Professional Accounting) (SF)' %}selected{% endif %}>B.Com. (Professional Accounting) (SF)</option>
+                    <option value="B.Com. (Business Process Services) (SF)" {% if student.department == 'B.Com. (Business Process Services) (SF)' %}selected{% endif %}>B.Com. (Business Process Services) (SF)</option>
+                    <option value="B.Com. (International Business) (SF)" {% if student.department == 'B.Com. (International Business) (SF)' %}selected{% endif %}>B.Com. (International Business) (SF)</option>
+                    <option value="B.B.A. (SF)" {% if student.department == 'B.B.A. (SF)' %}selected{% endif %}>B.B.A. (SF)</option>
+                </optgroup>
 
-{% if 'tenth_year' in labels %}<div class="col-md-6"><label>{{ labels.tenth_year }}</label><input name="tenth_year" class="form-control mb-2" value="{{ student.tenth_year|default_if_none:'' }}"></div>{% endif %}
-{% if 'tenth_percentage' in labels %}<div class="col-md-6"><label>{{ labels.tenth_percentage }}</label><input name="tenth_percentage" class="form-control mb-2" value="{{ student.tenth_percentage|default_if_none:'' }}"></div>{% endif %}
-{% if 'twelfth_year' in labels %}<div class="col-md-6"><label>{{ labels.twelfth_year }}</label><input name="twelfth_year" class="form-control mb-2" value="{{ student.twelfth_year|default_if_none:'' }}"></div>{% endif %}
-{% if 'twelfth_percentage' in labels %}<div class="col-md-6"><label>{{ labels.twelfth_percentage }}</label><input name="twelfth_percentage" class="form-control mb-2" value="{{ student.twelfth_percentage|default_if_none:'' }}"></div>{% endif %}
-{% if 'course' in labels %}<div class="col-md-6"><label>{{ labels.course }}</label><select name="course" class="form-select mb-2"><option value="">Select</option><option value="UG" {% if student.course == "UG" %}selected{% endif %}>UG</option><option value="PG" {% if student.course == "PG" %}selected{% endif %}>PG</option><option value="Research" {% if student.course == "Research" %}selected{% endif %}>Research</option></select></div>{% endif %}
-{% if 'batch' in labels %}<div class="col-md-6"><label>{{ labels.batch }}</label><input name="batch" class="form-control mb-2" value="{{ student.batch|default_if_none:'' }}"></div>{% endif %}
-{% if 'hosteller' in labels %}<div class="col-md-6"><label>{{ labels.hosteller }}</label><select name="hosteller" class="form-select mb-2"><option value="False" {% if not student.hosteller %}selected{% endif %}>No</option><option value="True" {% if student.hosteller %}selected{% endif %}>Yes</option></select></div>{% endif %}
+                <optgroup label="Self-Financing - PG">
+                    <option value="M.A. English Literature (SF)" {% if student.department == 'M.A. English Literature (SF)' %}selected{% endif %}>M.A. English Literature (SF)</option>
+                    <option value="M.Sc. Physics (SF)" {% if student.department == 'M.Sc. Physics (SF)' %}selected{% endif %}>M.Sc. Physics (SF)</option>
+                    <option value="M.Sc. Chemistry (SF)" {% if student.department == 'M.Sc. Chemistry (SF)' %}selected{% endif %}>M.Sc. Chemistry (SF)</option>
+                    <option value="M.Sc. Botany (SF)" {% if student.department == 'M.Sc. Botany (SF)' %}selected{% endif %}>M.Sc. Botany (SF)</option>
+                    <option value="M.Sc. Computer Science (SF)" {% if student.department == 'M.Sc. Computer Science (SF)' %}selected{% endif %}>M.Sc. Computer Science (SF)</option>
+                    <option value="M.Com. (Computer Applications) (SF)" {% if student.department == 'M.Com. (Computer Applications) (SF)' %}selected{% endif %}>M.Com. (Computer Applications) (SF)</option>
+                    <option value="M.S.W. (Social Work) (SF)" {% if student.department == 'M.S.W. (Social Work) (SF)' %}selected{% endif %}>M.S.W. (Social Work) (SF)</option>
+                </optgroup>
+                
+                <option value="Other" {% if student.department and 'Aided' not in student.department and 'SF' not in student.department %}selected{% endif %}>Other</option>
+            </select>
+            
+            <input type="text" name="department_other" id="departmentOther" class="form-control mt-2" 
+                   placeholder="Please specify custom department" 
+                   value="{% if student.department and 'Aided' not in student.department and 'SF' not in student.department %}{{ student.department|default_if_none:'' }}{% endif %}" 
+                   style="display: none;">
+        </div>
 
-{% if custom_fields %}<div class="col-md-12 mt-3"><h5 class="text-primary">Additional Details</h5><hr></div>{% endif %}
-{% for cf in custom_fields %}
-<div class="col-md-6"><label>{{ cf.display_name }}</label><input name="custom_{{ cf.id }}" class="form-control mb-2" value="{{ cf.current_value }}"></div>
-{% endfor %}
-</div>
+        <div class="col-md-3">
+            <label class="form-label">Gender</label>
+            <select name="gender" class="form-select">
+                <option value="">Select</option>
+                <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
 
-<div class="mt-3 d-flex gap-2"><button class="btn btn-success">Save Changes</button><a href="/student/{{ student.id }}/" class="btn btn-secondary">Cancel</a></div>
+        <div class="col-md-3">
+            <label class="form-label">Date of Birth</label>
+            <input type="date" name="dob" class="form-control" value="{{ student.dob|date:'Y-m-d'|default_if_none:'' }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Blood Group</label>
+            <select name="blood_group" class="form-select">
+                <option value="">Select</option>
+                <option value="A+" {% if student.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                <option value="A-" {% if student.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                <option value="B+" {% if student.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                <option value="B-" {% if student.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                <option value="O+" {% if student.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                <option value="O-" {% if student.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                <option value="AB+" {% if student.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                <option value="AB-" {% if student.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select">
+                <option value="">Select</option>
+                <option value="BC" {% if student.category == 'BC' %}selected{% endif %}>BC</option>
+                <option value="MBC" {% if student.category == 'MBC' %}selected{% endif %}>MBC</option>
+                <option value="OBC" {% if student.category == 'OBC' %}selected{% endif %}>OBC</option>
+                <option value="SC" {% if student.category == 'SC' %}selected{% endif %}>SC</option>
+                <option value="ST" {% if student.category == 'ST' %}selected{% endif %}>ST</option>
+                <option value="General" {% if student.category == 'General' %}selected{% endif %}>General</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Religion</label>
+            <select name="religion" id="religionSelect" class="form-select" onchange="toggleReligion()">
+                <option value="">Select Religion</option>
+                <option value="Hindu" {% if student.religion == 'Hindu' %}selected{% endif %}>Hindu</option>
+                <option value="Muslim" {% if student.religion == 'Muslim' %}selected{% endif %}>Muslim</option>
+                <option value="Christian" {% if student.religion == 'Christian' %}selected{% endif %}>Christian</option>
+                <option value="Sikh" {% if student.religion == 'Sikh' %}selected{% endif %}>Sikh</option>
+                <option value="Jain" {% if student.religion == 'Jain' %}selected{% endif %}>Jain</option>
+                <option value="Buddhist" {% if student.religion == 'Buddhist' %}selected{% endif %}>Buddhist</option>
+                <option value="Other" {% if student.religion != 'Hindu' and student.religion != 'Muslim' and student.religion != 'Christian' and student.religion != 'Sikh' and student.religion != 'Jain' and student.religion != 'Buddhist' and student.religion %}selected{% endif %}>Other</option>
+            </select>
+            <input type="text" name="religion_other" id="religionOther" class="form-control mt-2" placeholder="Please specify religion" 
+                   value="{% if student.religion != 'Hindu' and student.religion != 'Muslim' and student.religion != 'Christian' and student.religion != 'Sikh' and student.religion != 'Jain' and student.religion != 'Buddhist' %}{{ student.religion|default_if_none:'' }}{% endif %}" 
+                   style="display: none;">
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Aadhaar Number</label>
+            <input type="text" id="aadhaarInput" name="aadhaar" class="form-control" value="{{ student.aadhaar|default_if_none:'' }}" placeholder="XXXX XXXX XXXX" maxlength="14">
+            <small class="text-danger" id="aadhaarError" style="display:none;">Must be exactly 12 digits</small>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Student Phone</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light text-muted">+91</span>
+                <input type="text" name="phone" class="form-control" value="{{ student.phone|default_if_none:'' }}" pattern="\d{10}" title="Must be exactly 10 digits" maxlength="10">
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-control" value="{{ student.email|default_if_none:'' }}">
+        </div>
+    </div>
+
+    <h5 class="mb-3 mt-4 text-primary border-bottom pb-2">Academic & Additional Details</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Course</label>
+            <select name="course" class="form-select">
+                <option value="UG" {% if student.course == 'UG' %}selected{% endif %}>UG</option>
+                <option value="PG" {% if student.course == 'PG' %}selected{% endif %}>PG</option>
+                <option value="Research" {% if student.course == 'Research' %}selected{% endif %}>Research</option>
+            </select>
+        </div>
+        <div class="col-md-8">
+            <label class="form-label">Batch</label>
+            <input type="text" name="batch" class="form-control" value="{{ student.batch|default_if_none:'' }}" placeholder="e.g. 2023-2026">
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">10th Passing Year</label>
+            <input type="number" name="tenth_year" class="form-control" value="{{ student.tenth_year|default_if_none:'' }}" placeholder="YYYY">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">10th Percentage (%)</label>
+            <input type="number" step="0.01" name="tenth_percentage" class="form-control" value="{{ student.tenth_percentage|default_if_none:'' }}" placeholder="e.g. 85.50">
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">12th Passing Year</label>
+            <input type="number" name="twelfth_year" class="form-control" value="{{ student.twelfth_year|default_if_none:'' }}" placeholder="YYYY">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">12th Percentage (%)</label>
+            <input type="number" step="0.01" name="twelfth_percentage" class="form-control" value="{{ student.twelfth_percentage|default_if_none:'' }}" placeholder="e.g. 92.00">
+        </div>
+
+        <div class="col-md-12">
+            <label class="form-label">Permanent Address</label>
+            <textarea name="permanent_address" class="form-control" rows="2" placeholder="Enter full permanent address">{{ student.permanent_address|default_if_none:'' }}</textarea>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Hosteller?</label>
+            <select name="hosteller" class="form-select">
+                <option value="False" {% if not student.hosteller %}selected{% endif %}>No</option>
+                <option value="True" {% if student.hosteller %}selected{% endif %}>Yes</option>
+            </select>
+        </div>
+        
+        <div class="col-md-6">
+            <label class="form-label">Physically Challenged?</label>
+            <select name="physically_challenged" class="form-select">
+                <option value="False" {% if not student.physically_challenged %}selected{% endif %}>No</option>
+                <option value="True" {% if student.physically_challenged %}selected{% endif %}>Yes</option>
+            </select>
+        </div>
+    </div>
+
+    <h5 class="mb-3 mt-4 text-primary border-bottom pb-2">Family & Guardian Details</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Father's First Name</label>
+            <input type="text" name="father_first_name" class="form-control" value="{{ student.father_first_name|default_if_none:'' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Father's Last Name</label>
+            <input type="text" name="father_last_name" class="form-control" value="{{ student.father_last_name|default_if_none:'' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Father's Phone</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light text-muted">+91</span>
+                <input type="text" name="father_phone" class="form-control" value="{{ student.father_phone|default_if_none:'' }}" pattern="\d{10}" maxlength="10">
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Mother's First Name</label>
+            <input type="text" name="mother_first_name" class="form-control" value="{{ student.mother_first_name|default_if_none:'' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Mother's Last Name</label>
+            <input type="text" name="mother_last_name" class="form-control" value="{{ student.mother_last_name|default_if_none:'' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Mother's Phone</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light text-muted">+91</span>
+                <input type="text" name="mother_phone" class="form-control" value="{{ student.mother_phone|default_if_none:'' }}" pattern="\d{10}" maxlength="10">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Guardian Name (If applicable)</label>
+            <input type="text" name="guardian_name" class="form-control" value="{{ student.guardian_name|default_if_none:'' }}">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Guardian Phone</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light text-muted">+91</span>
+                <input type="text" name="guardian_phone" class="form-control" value="{{ student.guardian_phone|default_if_none:'' }}" pattern="\d{10}" maxlength="10">
+            </div>
+        </div>
+    </div>
+    
+    {% if custom_fields %}
+    <h5 class="mb-3 mt-4 text-primary border-bottom pb-2">Additional Custom Details</h5>
+    <div class="row g-3">
+        {% for cf in custom_fields %}
+        <div class="col-md-6">
+            <label class="form-label">{{ cf.display_name }}</label>
+            <input type="text" name="custom_{{ cf.id }}" class="form-control" value="{{ cf.current_value|default_if_none:'' }}">
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mt-4 pt-3 border-top">
+        <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm" style="border-radius: 8px;">
+            <i class="bi bi-check-circle-fill me-1"></i> Update Student Profile
+        </button>
+        <a href="javascript:history.back()" class="btn btn-secondary fw-bold px-4 ms-2 shadow-sm" style="border-radius: 8px;">
+            Cancel
+        </a>
+    </div>
 </form>
-</div>
+
+<script>
+    const aadhaarInput = document.getElementById('aadhaarInput');
+    const aadhaarError = document.getElementById('aadhaarError');
+
+    aadhaarInput.addEventListener('input', function (e) {
+        let val = e.target.value.replace(/\D/g, '').substring(0, 12);
+        e.target.value = val.match(/.{1,4}/g)?.join(' ') || val;
+        
+        if (val.length > 0 && val.length < 12) {
+            aadhaarError.style.display = 'block';
+            aadhaarInput.setCustomValidity("Aadhaar must be exactly 12 digits");
+        } else {
+            aadhaarError.style.display = 'none';
+            aadhaarInput.setCustomValidity("");
+        }
+    });
+
+    function toggleReligion() {
+        const select = document.getElementById('religionSelect');
+        const otherInput = document.getElementById('religionOther');
+        if (select.value === 'Other') {
+            otherInput.style.display = 'block';
+            otherInput.required = true;
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.required = false;
+        }
+    }
+
+    function toggleDepartment() {
+        const select = document.getElementById('departmentSelect');
+        const otherInput = document.getElementById('departmentOther');
+        if (select.value === 'Other') {
+            otherInput.style.display = 'block';
+            otherInput.required = true;
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.required = false;
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleReligion();
+        toggleDepartment();
+        if(aadhaarInput.value) {
+            aadhaarInput.dispatchEvent(new Event('input'));
+        }
+    });
+</script>
 {% endblock %}

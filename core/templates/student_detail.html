@@ -1,22 +1,27 @@
 {% extends 'base.html' %}
-{% block title %}Student Details{% endblock %}
+{% block title %}{{ student.first_name }}'s Details{% endblock %}
 
 {% block content %}
 <style>
     /* 🔥 Dark Mode & Polish Fixes 🔥 */
-    body.dark-mode .card { background-color: #1e293b; border-color: #334155; }
+    body.dark-mode .card { background-color: #1e293b; border-color: #334155 !important; }
     body.dark-mode .text-muted { color: #94a3b8 !important; }
     body.dark-mode .data-value { color: #f8fafc; }
-    body.dark-mode hr, body.dark-mode .border-top { border-color: #475569 !important; }
+    body.dark-mode hr, body.dark-mode .border-top { border-color: #334155 !important; }
     
     /* Polished Typography */
     .data-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
     .data-value { font-size: 1.05rem; font-weight: 500; color: #1e293b; margin-bottom: 1.25rem; }
-    .btn-action { border-radius: 8px; font-weight: 600; padding: 8px 16px; }
+    .btn-action { border-radius: 8px; font-weight: 600; padding: 8px 16px; transition: all 0.2s ease; }
+    .btn-action:hover { transform: translateY(-2px); }
+    
+    /* 🔥 Dark Mode Button Fixes 🔥 */
+    body.dark-mode .btn-secondary { background-color: #334155; border-color: #475569; color: #f8fafc; }
+    body.dark-mode .btn-secondary:hover { background-color: #475569; }
 </style>
 
 <div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
-    <h3 class="mb-4 text-primary fw-bold"><i class="bi bi-person-badge-fill me-2"></i>{{ student.name }}</h3>
+    <h3 class="mb-4 text-primary fw-bold"><i class="bi bi-person-badge-fill me-2"></i>{{ student.first_name }} {{ student.last_name }}</h3>
 
     <div class="row">
         {% for field in fields %}
@@ -29,17 +34,16 @@
 
     <div class="d-flex flex-wrap gap-2 mt-4 pt-4 border-top">
         {% if is_admin or is_faculty %}
-            <a href="{% url 'student_list' %}" class="btn btn-secondary btn-action"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
+            <a href="{% url 'student_list' %}" class="btn btn-secondary btn-action shadow-sm"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
         {% else %}
-            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary btn-action"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary btn-action shadow-sm"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
         {% endif %}
 
-        <a href="/student/full/{{ student.id }}/" class="btn btn-info btn-action text-white"><i class="bi bi-list-ul me-1"></i> More Details</a>
-        <a href="/digilocker/{{ student.id }}/" class="btn btn-warning btn-action text-dark"><i class="bi bi-folder-fill me-1"></i> View DigiLocker</a>
+        <a href="/digilocker/{{ student.id }}/" class="btn btn-warning btn-action text-dark shadow-sm"><i class="bi bi-folder-fill me-1"></i> View DigiLocker</a>
 
         {% if is_admin %}
-            <a href="/student/{{ student.id }}/edit/" class="btn btn-primary btn-action"><i class="bi bi-pencil-square me-1"></i> Edit Details</a>
-            <a href="/student/{{ student.id }}/delete/" class="btn btn-danger btn-action" onclick="return confirm('Delete this student?');"><i class="bi bi-trash-fill me-1"></i> Delete</a>
+            <a href="/student/{{ student.id }}/edit/" class="btn btn-primary btn-action shadow-sm"><i class="bi bi-pencil-square me-1"></i> Edit Details</a>
+            <a href="/student/{{ student.id }}/delete/" class="btn btn-danger btn-action shadow-sm" onclick="return confirm('Delete this student?');"><i class="bi bi-trash-fill me-1"></i> Delete</a>
         {% endif %}
     </div>
 </div>

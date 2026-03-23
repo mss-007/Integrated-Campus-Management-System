@@ -3,7 +3,7 @@
 
 {% block content %}
 <style>
-    /* 🔥 Fix Chrome Autofill Yellow/Beige Background in Dark Mode 🔥 */
+    /* 🔥 Dark Mode Fixes for Form Inputs, Dropdowns & Chrome Autofill 🔥 */
     body.dark-mode input:-webkit-autofill,
     body.dark-mode input:-webkit-autofill:hover, 
     body.dark-mode input:-webkit-autofill:focus, 
@@ -15,34 +15,165 @@
         transition: background-color 5000s ease-in-out 0s;
     }
 
-    /* Ensure dropdown options turn dark */
-    body.dark-mode select.form-select option {
-        background-color: #0f172a;
-        color: #f8fafc;
+    body.dark-mode input.form-control, body.dark-mode select.form-select {
+        background-color: #0f172a; color: #f8fafc; border-color: #334155;
     }
+    body.dark-mode input.form-control:focus, body.dark-mode select.form-select:focus {
+        background-color: #0f172a; color: #ffffff; border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+    }
+    body.dark-mode select.form-select option, body.dark-mode select.form-select optgroup { 
+        background-color: #0f172a; color: #f8fafc; 
+    }
+    body.dark-mode label { color: #cbd5e1; font-weight: 500; }
 </style>
 
-<div class="card p-4">
-<h4 class="mb-3">Edit Faculty</h4>
-<form method="POST">
-{% csrf_token %}
-<div class="row">
-{% if 'name' in labels %}<div class="col-md-6"><label>{{ labels.name }}</label><input name="name" class="form-control mb-2" value="{{ faculty.name }}"></div>{% endif %}
-{% if 'department' in labels %}<div class="col-md-6"><label>{{ labels.department }}</label><input name="department" class="form-control mb-2" value="{{ faculty.department }}"></div>{% endif %}
-{% if 'designation' in labels %}<div class="col-md-6"><label>{{ labels.designation }}</label><input name="designation" class="form-control mb-2" value="{{ faculty.designation }}"></div>{% endif %}
-{% if 'staff_type' in labels %}
-<div class="col-md-6"><label>{{ labels.staff_type }}</label>
-<select name="staff_type" class="form-select mb-2"><option value="teaching" {% if faculty.staff_type == 'teaching' %}selected{% endif %}>Teaching</option><option value="non_teaching" {% if faculty.staff_type == 'non_teaching' %}selected{% endif %}>Non Teaching</option></select>
-</div>
-{% endif %}
+<div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
+    <h4 class="mb-4 text-primary fw-bold"><i class="bi bi-person-badge-fill me-2"></i>Edit Faculty / Staff</h4>
+    
+    <form method="POST" id="editFacultyForm" autocomplete="off">
+    {% csrf_token %}
+    
+    <div class="row g-3">
+        {% if 'name' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.name }} *</label>
+            <input type="text" name="name" class="form-control" value="{{ faculty.name|default_if_none:'' }}" required>
+        </div>
+        {% endif %}
 
-{% if custom_fields %}<div class="col-md-12 mt-3"><h5 class="text-primary">Additional Details</h5><hr></div>{% endif %}
-{% for cf in custom_fields %}
-<div class="col-md-6"><label>{{ cf.display_name }}</label><input name="custom_{{ cf.id }}" class="form-control mb-2" value="{{ cf.current_value }}"></div>
-{% endfor %}
+        {% if 'staff_type' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.staff_type }} *</label>
+            <select name="staff_type" class="form-select" required>
+                <option value="teaching" {% if faculty.staff_type == 'teaching' %}selected{% endif %}>Teaching Faculty</option>
+                <option value="non_teaching" {% if faculty.staff_type == 'non_teaching' %}selected{% endif %}>Non-Teaching Staff</option>
+            </select>
+        </div>
+        {% endif %}
+
+        {% if 'designation' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.designation }} *</label>
+            <input type="text" name="designation" class="form-control" value="{{ faculty.designation|default_if_none:'' }}" required>
+        </div>
+        {% endif %}
+
+        {% if 'department' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.department }} *</label>
+            <select name="department" id="departmentSelect" class="form-select" onchange="toggleDepartment()" required>
+                <option value="">Select Department</option>
+                
+                <optgroup label="Aided - UG">
+                    <option value="B.A. History (Aided)" {% if faculty.department == 'B.A. History (Aided)' %}selected{% endif %}>B.A. History (Aided)</option>
+                    <option value="B.A. Economics (Aided)" {% if faculty.department == 'B.A. Economics (Aided)' %}selected{% endif %}>B.A. Economics (Aided)</option>
+                    <option value="B.A. English Literature (Aided)" {% if faculty.department == 'B.A. English Literature (Aided)' %}selected{% endif %}>B.A. English Literature (Aided)</option>
+                    <option value="B.Sc. Mathematics (Aided)" {% if faculty.department == 'B.Sc. Mathematics (Aided)' %}selected{% endif %}>B.Sc. Mathematics (Aided)</option>
+                    <option value="B.Sc. Physics (Aided)" {% if faculty.department == 'B.Sc. Physics (Aided)' %}selected{% endif %}>B.Sc. Physics (Aided)</option>
+                    <option value="B.Sc. Chemistry (Aided)" {% if faculty.department == 'B.Sc. Chemistry (Aided)' %}selected{% endif %}>B.Sc. Chemistry (Aided)</option>
+                    <option value="B.Sc. Botany (Aided)" {% if faculty.department == 'B.Sc. Botany (Aided)' %}selected{% endif %}>B.Sc. Botany (Aided)</option>
+                    <option value="B.Sc. Zoology (Aided)" {% if faculty.department == 'B.Sc. Zoology (Aided)' %}selected{% endif %}>B.Sc. Zoology (Aided)</option>
+                    <option value="B.Sc. Computer Science (Aided)" {% if faculty.department == 'B.Sc. Computer Science (Aided)' %}selected{% endif %}>B.Sc. Computer Science (Aided)</option>
+                    <option value="B.Com. (Aided)" {% if faculty.department == 'B.Com. (Aided)' %}selected{% endif %}>B.Com. (Aided)</option>
+                </optgroup>
+
+                <optgroup label="Aided - PG">
+                    <option value="M.A. Tamil Language and Literature (Aided)" {% if faculty.department == 'M.A. Tamil Language and Literature (Aided)' %}selected{% endif %}>M.A. Tamil Language and Literature (Aided)</option>
+                    <option value="M.Sc. Mathematics (Aided)" {% if faculty.department == 'M.Sc. Mathematics (Aided)' %}selected{% endif %}>M.Sc. Mathematics (Aided)</option>
+                    <option value="M.Com. (Aided)" {% if faculty.department == 'M.Com. (Aided)' %}selected{% endif %}>M.Com. (Aided)</option>
+                </optgroup>
+
+                <optgroup label="Self-Financing - UG">
+                    <option value="B.A. Tamil Language and Literature (SF)" {% if faculty.department == 'B.A. Tamil Language and Literature (SF)' %}selected{% endif %}>B.A. Tamil Language and Literature (SF)</option>
+                    <option value="B.A. English Literature (SF)" {% if faculty.department == 'B.A. English Literature (SF)' %}selected{% endif %}>B.A. English Literature (SF)</option>
+                    <option value="B.Sc. Mathematics (SF)" {% if faculty.department == 'B.Sc. Mathematics (SF)' %}selected{% endif %}>B.Sc. Mathematics (SF)</option>
+                    <option value="B.Sc. Physics (SF)" {% if faculty.department == 'B.Sc. Physics (SF)' %}selected{% endif %}>B.Sc. Physics (SF)</option>
+                    <option value="B.Sc. Chemistry (SF)" {% if faculty.department == 'B.Sc. Chemistry (SF)' %}selected{% endif %}>B.Sc. Chemistry (SF)</option>
+                    <option value="B.Sc. Botany (SF)" {% if faculty.department == 'B.Sc. Botany (SF)' %}selected{% endif %}>B.Sc. Botany (SF)</option>
+                    <option value="B.Sc. Computer Science (SF)" {% if faculty.department == 'B.Sc. Computer Science (SF)' %}selected{% endif %}>B.Sc. Computer Science (SF)</option>
+                    <option value="B.C.A. (SF)" {% if faculty.department == 'B.C.A. (SF)' %}selected{% endif %}>B.C.A. (SF)</option>
+                    <option value="B.Sc. Information Technology (SF)" {% if faculty.department == 'B.Sc. Information Technology (SF)' %}selected{% endif %}>B.Sc. Information Technology (SF)</option>
+                    <option value="B.Sc. Computer Technology (SF)" {% if faculty.department == 'B.Sc. Computer Technology (SF)' %}selected{% endif %}>B.Sc. Computer Technology (SF)</option>
+                    <option value="B.Sc. Data Science (SF)" {% if faculty.department == 'B.Sc. Data Science (SF)' %}selected{% endif %}>B.Sc. Data Science (SF)</option>
+                    <option value="B.Sc. Artificial Intelligence & Machine Learning (SF)" {% if faculty.department == 'B.Sc. Artificial Intelligence & Machine Learning (SF)' %}selected{% endif %}>B.Sc. Artificial Intelligence & Machine Learning (SF)</option>
+                    <option value="B.Com. (SF)" {% if faculty.department == 'B.Com. (SF)' %}selected{% endif %}>B.Com. (SF)</option>
+                    <option value="B.Com. (Computer Applications) (SF)" {% if faculty.department == 'B.Com. (Computer Applications) (SF)' %}selected{% endif %}>B.Com. (Computer Applications) (SF)</option>
+                    <option value="B.Com. (Corporate Secretaryship) (SF)" {% if faculty.department == 'B.Com. (Corporate Secretaryship) (SF)' %}selected{% endif %}>B.Com. (Corporate Secretaryship) (SF)</option>
+                    <option value="B.Com. (E-Commerce) (SF)" {% if faculty.department == 'B.Com. (E-Commerce) (SF)' %}selected{% endif %}>B.Com. (E-Commerce) (SF)</option>
+                    <option value="B.Com. (Finance) (SF)" {% if faculty.department == 'B.Com. (Finance) (SF)' %}selected{% endif %}>B.Com. (Finance) (SF)</option>
+                    <option value="B.Com. (Banking and Insurance) (SF)" {% if faculty.department == 'B.Com. (Banking and Insurance) (SF)' %}selected{% endif %}>B.Com. (Banking and Insurance) (SF)</option>
+                    <option value="B.Com. (Professional Accounting) (SF)" {% if faculty.department == 'B.Com. (Professional Accounting) (SF)' %}selected{% endif %}>B.Com. (Professional Accounting) (SF)</option>
+                    <option value="B.Com. (Business Process Services) (SF)" {% if faculty.department == 'B.Com. (Business Process Services) (SF)' %}selected{% endif %}>B.Com. (Business Process Services) (SF)</option>
+                    <option value="B.Com. (International Business) (SF)" {% if faculty.department == 'B.Com. (International Business) (SF)' %}selected{% endif %}>B.Com. (International Business) (SF)</option>
+                    <option value="B.B.A. (SF)" {% if faculty.department == 'B.B.A. (SF)' %}selected{% endif %}>B.B.A. (SF)</option>
+                </optgroup>
+
+                <optgroup label="Self-Financing - PG">
+                    <option value="M.A. English Literature (SF)" {% if faculty.department == 'M.A. English Literature (SF)' %}selected{% endif %}>M.A. English Literature (SF)</option>
+                    <option value="M.Sc. Physics (SF)" {% if faculty.department == 'M.Sc. Physics (SF)' %}selected{% endif %}>M.Sc. Physics (SF)</option>
+                    <option value="M.Sc. Chemistry (SF)" {% if faculty.department == 'M.Sc. Chemistry (SF)' %}selected{% endif %}>M.Sc. Chemistry (SF)</option>
+                    <option value="M.Sc. Botany (SF)" {% if faculty.department == 'M.Sc. Botany (SF)' %}selected{% endif %}>M.Sc. Botany (SF)</option>
+                    <option value="M.Sc. Computer Science (SF)" {% if faculty.department == 'M.Sc. Computer Science (SF)' %}selected{% endif %}>M.Sc. Computer Science (SF)</option>
+                    <option value="M.Com. (Computer Applications) (SF)" {% if faculty.department == 'M.Com. (Computer Applications) (SF)' %}selected{% endif %}>M.Com. (Computer Applications) (SF)</option>
+                    <option value="M.S.W. (Social Work) (SF)" {% if faculty.department == 'M.S.W. (Social Work) (SF)' %}selected{% endif %}>M.S.W. (Social Work) (SF)</option>
+                </optgroup>
+                
+                <optgroup label="Administration / Support">
+                    <option value="Other" {% if faculty.department and 'Aided' not in faculty.department and 'SF' not in faculty.department %}selected{% endif %}>Other (Office / Admin / COE etc.)</option>
+                </optgroup>
+            </select>
+            
+            <input type="text" id="departmentOther" class="form-control mt-2" 
+                   placeholder="Please specify custom department" 
+                   value="{% if faculty.department and 'Aided' not in faculty.department and 'SF' not in faculty.department %}{{ faculty.department|default_if_none:'' }}{% endif %}" 
+                   style="display: none;">
+        </div>
+        {% endif %}
+
+        {% if custom_fields %}
+            <div class="col-12 mt-4">
+                <h5 class="text-primary border-bottom pb-2">Additional Details</h5>
+            </div>
+            {% for cf in custom_fields %}
+            <div class="col-md-6">
+                <label class="form-label mb-1">{{ cf.display_name }}</label>
+                <input type="text" name="custom_{{ cf.id }}" class="form-control" value="{{ cf.current_value|default_if_none:'' }}">
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-success fw-bold px-4 py-2 shadow-sm">
+            <i class="bi bi-check-circle-fill me-2"></i>Save Changes
+        </button>
+    </div>
+    </form>
 </div>
 
-<button class="btn btn-success mt-3">Save Changes</button>
-</form>
-</div>
+<script>
+    function toggleDepartment() {
+        const select = document.getElementById('departmentSelect');
+        const otherInput = document.getElementById('departmentOther');
+        
+        if (select.value === 'Other') {
+            // Show custom text box, require it, and give it the name="department"
+            otherInput.style.display = 'block';
+            otherInput.required = true;
+            select.removeAttribute('name');
+            otherInput.setAttribute('name', 'department');
+        } else {
+            // Hide custom text box, remove requirement, and restore name="department" to select
+            otherInput.style.display = 'none';
+            otherInput.required = false;
+            otherInput.removeAttribute('name');
+            select.setAttribute('name', 'department');
+        }
+    }
+    
+    // 🔥 Fire the function on page load so the "Other" text box opens automatically if they have a custom dept!
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleDepartment();
+    });
+</script>
 {% endblock %}

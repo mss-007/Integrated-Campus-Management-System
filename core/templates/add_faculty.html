@@ -2,31 +2,160 @@
 {% block title %}Add Faculty{% endblock %}
 
 {% block content %}
-<div class="card p-4">
-<h4 class="mb-4">Add Faculty</h4>
-<form method="POST">
-{% csrf_token %}
-<div class="row">
+<style>
+    /* 🔥 Dark Mode Fixes for Form Inputs & Dropdowns 🔥 */
+    body.dark-mode input.form-control, body.dark-mode select.form-select {
+        background-color: #0f172a; color: #f8fafc; border-color: #334155;
+    }
+    body.dark-mode input.form-control:focus, body.dark-mode select.form-select:focus {
+        background-color: #0f172a; color: #ffffff; border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+    }
+    body.dark-mode select.form-select option, body.dark-mode select.form-select optgroup { 
+        background-color: #0f172a; color: #f8fafc; 
+    }
+    body.dark-mode label { color: #cbd5e1; font-weight: 500; }
+</style>
 
-{% if 'name' in labels %}<div class="col-md-6"><label>{{ labels.name }}</label><input name="name" class="form-control mb-3" required></div>{% endif %}
-{% if 'department' in labels %}<div class="col-md-6"><label>{{ labels.department }}</label><input name="department" class="form-control mb-3" required></div>{% endif %}
-{% if 'designation' in labels %}<div class="col-md-6"><label>{{ labels.designation }}</label><input name="designation" class="form-control mb-3" required></div>{% endif %}
+<div class="card p-4 shadow-sm border-0" style="border-radius: 16px;">
+    <h4 class="mb-4 text-primary fw-bold"><i class="bi bi-person-badge-fill me-2"></i>Add Faculty / Staff</h4>
+    
+    <form method="POST" id="addFacultyForm" autocomplete="off">
+    {% csrf_token %}
+    
+    <div class="row g-3">
+        {% if 'name' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.name }} *</label>
+            <input type="text" name="name" class="form-control" required placeholder="e.g. Dr. John Doe">
+        </div>
+        {% endif %}
 
-{% if 'staff_type' in labels %}
-<div class="col-md-6"><label>{{ labels.staff_type }}</label>
-<select name="staff_type" class="form-select mb-3">
-    <option value="teaching">Teaching</option>
-    <option value="non_teaching">Non Teaching</option>
-</select>
+        {% if 'staff_type' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.staff_type }} *</label>
+            <select name="staff_type" class="form-select" required>
+                <option value="teaching">Teaching Faculty</option>
+                <option value="non_teaching">Non-Teaching Staff</option>
+            </select>
+        </div>
+        {% endif %}
+
+        {% if 'designation' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.designation }} *</label>
+            <input type="text" name="designation" class="form-control" required placeholder="e.g. Assistant Professor">
+        </div>
+        {% endif %}
+
+        {% if 'department' in labels %}
+        <div class="col-md-6">
+            <label class="form-label mb-1">{{ labels.department }} *</label>
+            <select name="department" id="departmentSelect" class="form-select" onchange="toggleDepartment()" required>
+                <option value="">Select Department</option>
+                
+                <optgroup label="Aided - UG">
+                    <option value="B.A. History (Aided)">B.A. History (Aided)</option>
+                    <option value="B.A. Economics (Aided)">B.A. Economics (Aided)</option>
+                    <option value="B.A. English Literature (Aided)">B.A. English Literature (Aided)</option>
+                    <option value="B.Sc. Mathematics (Aided)">B.Sc. Mathematics (Aided)</option>
+                    <option value="B.Sc. Physics (Aided)">B.Sc. Physics (Aided)</option>
+                    <option value="B.Sc. Chemistry (Aided)">B.Sc. Chemistry (Aided)</option>
+                    <option value="B.Sc. Botany (Aided)">B.Sc. Botany (Aided)</option>
+                    <option value="B.Sc. Zoology (Aided)">B.Sc. Zoology (Aided)</option>
+                    <option value="B.Sc. Computer Science (Aided)">B.Sc. Computer Science (Aided)</option>
+                    <option value="B.Com. (Aided)">B.Com. (Aided)</option>
+                </optgroup>
+
+                <optgroup label="Aided - PG">
+                    <option value="M.A. Tamil Language and Literature (Aided)">M.A. Tamil Language and Literature (Aided)</option>
+                    <option value="M.Sc. Mathematics (Aided)">M.Sc. Mathematics (Aided)</option>
+                    <option value="M.Com. (Aided)">M.Com. (Aided)</option>
+                </optgroup>
+
+                <optgroup label="Self-Financing - UG">
+                    <option value="B.A. Tamil Language and Literature (SF)">B.A. Tamil Language and Literature (SF)</option>
+                    <option value="B.A. English Literature (SF)">B.A. English Literature (SF)</option>
+                    <option value="B.Sc. Mathematics (SF)">B.Sc. Mathematics (SF)</option>
+                    <option value="B.Sc. Physics (SF)">B.Sc. Physics (SF)</option>
+                    <option value="B.Sc. Chemistry (SF)">B.Sc. Chemistry (SF)</option>
+                    <option value="B.Sc. Botany (SF)">B.Sc. Botany (SF)</option>
+                    <option value="B.Sc. Computer Science (SF)">B.Sc. Computer Science (SF)</option>
+                    <option value="B.C.A. (SF)">B.C.A. (SF)</option>
+                    <option value="B.Sc. Information Technology (SF)">B.Sc. Information Technology (SF)</option>
+                    <option value="B.Sc. Computer Technology (SF)">B.Sc. Computer Technology (SF)</option>
+                    <option value="B.Sc. Data Science (SF)">B.Sc. Data Science (SF)</option>
+                    <option value="B.Sc. Artificial Intelligence & Machine Learning (SF)">B.Sc. Artificial Intelligence & Machine Learning (SF)</option>
+                    <option value="B.Com. (SF)">B.Com. (SF)</option>
+                    <option value="B.Com. (Computer Applications) (SF)">B.Com. (Computer Applications) (SF)</option>
+                    <option value="B.Com. (Corporate Secretaryship) (SF)">B.Com. (Corporate Secretaryship) (SF)</option>
+                    <option value="B.Com. (E-Commerce) (SF)">B.Com. (E-Commerce) (SF)</option>
+                    <option value="B.Com. (Finance) (SF)">B.Com. (Finance) (SF)</option>
+                    <option value="B.Com. (Banking and Insurance) (SF)">B.Com. (Banking and Insurance) (SF)</option>
+                    <option value="B.Com. (Professional Accounting) (SF)">B.Com. (Professional Accounting) (SF)</option>
+                    <option value="B.Com. (Business Process Services) (SF)">B.Com. (Business Process Services) (SF)</option>
+                    <option value="B.Com. (International Business) (SF)">B.Com. (International Business) (SF)</option>
+                    <option value="B.B.A. (SF)">B.B.A. (SF)</option>
+                </optgroup>
+
+                <optgroup label="Self-Financing - PG">
+                    <option value="M.A. English Literature (SF)">M.A. English Literature (SF)</option>
+                    <option value="M.Sc. Physics (SF)">M.Sc. Physics (SF)</option>
+                    <option value="M.Sc. Chemistry (SF)">M.Sc. Chemistry (SF)</option>
+                    <option value="M.Sc. Botany (SF)">M.Sc. Botany (SF)</option>
+                    <option value="M.Sc. Computer Science (SF)">M.Sc. Computer Science (SF)</option>
+                    <option value="M.Com. (Computer Applications) (SF)">M.Com. (Computer Applications) (SF)</option>
+                    <option value="M.S.W. (Social Work) (SF)">M.S.W. (Social Work) (SF)</option>
+                </optgroup>
+                
+                <optgroup label="Administration / Support">
+                    <option value="Other">Other (Office / Admin / COE etc.)</option>
+                </optgroup>
+            </select>
+            
+            <input type="text" id="departmentOther" class="form-control mt-2" 
+                   placeholder="Please specify custom department" style="display: none;">
+        </div>
+        {% endif %}
+
+        {% if custom_fields %}
+            <div class="col-12 mt-4">
+                <h5 class="text-primary border-bottom pb-2">Additional Details</h5>
+            </div>
+            {% for cf in custom_fields %}
+            <div class="col-md-6">
+                <label class="form-label mb-1">{{ cf.display_name }}</label>
+                <input type="text" name="custom_{{ cf.id }}" class="form-control">
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 shadow-sm">
+            <i class="bi bi-person-plus-fill me-2"></i>Add Record
+        </button>
+    </div>
+    </form>
 </div>
-{% endif %}
 
-{% for cf in custom_fields %}
-<div class="col-md-6"><label>{{ cf.display_name }}</label><input name="custom_{{ cf.id }}" class="form-control mb-3"></div>
-{% endfor %}
-</div>
-
-<div class="d-flex justify-content-end mt-3"><button type="submit" class="btn btn-success px-4">Add Faculty</button></div>
-</form>
-</div>
+<script>
+    function toggleDepartment() {
+        const select = document.getElementById('departmentSelect');
+        const otherInput = document.getElementById('departmentOther');
+        
+        if (select.value === 'Other') {
+            // Show custom text box, require it, and give it the name="department"
+            otherInput.style.display = 'block';
+            otherInput.required = true;
+            select.removeAttribute('name');
+            otherInput.setAttribute('name', 'department');
+        } else {
+            // Hide custom text box, remove requirement, and restore name="department" to select
+            otherInput.style.display = 'none';
+            otherInput.required = false;
+            otherInput.removeAttribute('name');
+            select.setAttribute('name', 'department');
+        }
+    }
+</script>
 {% endblock %}

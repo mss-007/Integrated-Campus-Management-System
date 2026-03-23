@@ -87,7 +87,7 @@
             <div class="profile-icon-large">
                 <i class="bi bi-person-badge"></i>
             </div>
-            <h2 class="fw-bold mb-1">Welcome back, {{ student.name }}! 👋</h2>
+            <h2 class="fw-bold mb-1">Welcome back, {{ student.first_name }} {{ student.last_name }}! 👋</h2>
             <p class="mb-4 opacity-75">Your academic journey at a glance.</p>
             
             <div class="row">
@@ -149,7 +149,8 @@
         const greetingElement = document.getElementById("greeting");
         if (greetingElement) {
             const timeGreeting = getGreetingData();
-            greetingElement.innerText = `${timeGreeting}, {{ student.name|escapejs }}`;
+            // 🔥 FIXED: Using first_name and last_name for the sidebar JS injection 🔥
+            greetingElement.innerText = `${timeGreeting}, {{ student.first_name|escapejs }} {{ student.last_name|escapejs }}`;
         }
     });
 </script>

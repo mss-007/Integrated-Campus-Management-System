@@ -10,6 +10,27 @@
     body.dark-mode td { border-bottom-color: #334155; }
     body.dark-mode .table-hover tbody tr:hover td { background-color: rgba(51, 65, 85, 0.5); color: #f8fafc; }
     body.dark-mode .text-muted { color: #94a3b8 !important; }
+    
+    /* 🔥 Make sure normal text doesn't vanish in dark mode 🔥 */
+    body.dark-mode .designation-text { color: #e2e8f0; }
+
+    /* 🔥 High-Contrast Department Badge 🔥 */
+    .dept-badge {
+        background-color: #f0fdf4; /* Very light green/blue */
+        color: #166534; /* Dark solid text */
+        border: 1px solid #bbf7d0;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    body.dark-mode .dept-badge {
+        background-color: rgba(56, 189, 248, 0.1); 
+        color: #38bdf8; 
+        border: 1px solid rgba(56, 189, 248, 0.25);
+    }
 
     /* 🔥 Polished Custom Search Bar 🔥 */
     .search-wrapper {
@@ -51,7 +72,7 @@
         transition: color 0.2s ease;
     }
     
-    .clear-btn:hover { color: #ef4444; } /* Turns red on hover */
+    .clear-btn:hover { color: #ef4444; }
 
     .search-btn {
         border-radius: 0;
@@ -117,8 +138,11 @@
                 {% for f in faculty %}
                 <tr>
                     <td class="ps-3 fw-medium">{{ f.name }}</td>
-                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">{{ f.department }}</span></td>
-                    <td>{{ f.designation }}</td>
+                    
+                    <td><span class="dept-badge">{{ f.department|default:"-" }}</span></td>
+                    
+                    <td><span class="designation-text">{{ f.custom_designation|default:"<span class='text-muted small fst-italic'>Not Specified</span>" }}</span></td>
+                    
                     <td class="text-end pe-3">
                         <a href="{% url 'faculty_view' f.id %}" class="btn btn-info text-white action-btn shadow-sm">
                             <i class="bi bi-eye-fill me-1"></i> View

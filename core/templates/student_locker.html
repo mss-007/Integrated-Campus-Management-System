@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ student.name }}'s DigiLocker{% endblock %}
+{% block title %}{{ student.first_name }} {{ student.last_name }}'s DigiLocker{% endblock %}
 
 {% block content %}
 <style>
@@ -45,7 +45,7 @@
 
 <div class="card p-4 mb-4">
     <div class="d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">📁 {{ student.name }}'s DigiLocker</h4>
+        <h4 class="mb-0">📁 {{ student.first_name }} {{ student.last_name }}'s DigiLocker</h4>
         
         {% if is_admin %}
             <a href="javascript:history.back()" class="btn btn-secondary btn-sm">Back to Search</a>
@@ -64,23 +64,61 @@
 
             {% if item.document %}
                 <p class="text-success fw-bold mb-1">✔ Document Uploaded</p>
-                <p class="text-muted small">Date: {{ item.document.uploaded_at|date:"d-m-Y" }}</p>
+                <p class="text-muted small mb-1">Date: {{ item.document.uploaded_at|date:"d-m-Y" }}</p>
+                
+                {% if is_admin or not is_faculty %}
+                    {% if item.document.status == 'Requested' %}
+                        <span class="badge bg-warning text-dark mb-2">Unlock Requested</span>
+                    {% elif item.document.status == 'Unlocked' %}
+                        <span class="badge bg-info text-white mb-2">Unlocked for Edit</span>
+                    {% else %}
+                        <span class="badge bg-secondary mb-2"><i class="bi bi-lock-fill"></i> Locked</span>
+                    {% endif %}
+                {% endif %}
                 
                 <div class="mt-3">
-                    <a href="{{ item.document.file.url }}" target="_blank" class="btn btn-success btn-sm {% if is_faculty %}w-100{% endif %}">View File</a>
+                    <a href="{{ item.document.file.url }}" target="_blank" class="btn btn-success btn-sm mb-1 {% if is_faculty and not is_admin %}w-100{% endif %}">View File</a>
                     
-                    {% if not is_faculty %}
-                    <form method="POST" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="doc_type_id" value="{{ item.type.id }}">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this document?');">Delete</button>
-                    </form>
+                    {% if not is_faculty and not is_admin %}
+                        {% if item.document.status == 'Locked' %}
+                            <form method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="request_edit">
+                                <input type="hidden" name="doc_type_id" value="{{ item.type.id }}">
+                                <button type="submit" class="btn btn-secondary btn-sm mb-1">Request Edit</button>
+                            </form>
+                        {% elif item.document.status == 'Requested' %}
+                            <button class="btn btn-outline-secondary btn-sm mb-1" disabled>Pending Admin...</button>
+                        {% elif item.document.status == 'Unlocked' %}
+                            <form method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="doc_type_id" value="{{ item.type.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm mb-1" onclick="return confirm('Delete this to upload a new one?');">Delete & Replace</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if is_admin %}
+                        {% if item.document.status == 'Requested' %}
+                            <form method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="approve_edit">
+                                <input type="hidden" name="doc_type_id" value="{{ item.type.id }}">
+                                <button type="submit" class="btn btn-warning btn-sm mb-1 fw-bold text-dark">Approve Unlock</button>
+                            </form>
+                        {% endif %}
+                        <form method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="doc_type_id" value="{{ item.type.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm mb-1" onclick="return confirm('Delete this document?');"><i class="bi bi-trash"></i></button>
+                        </form>
                     {% endif %}
                 </div>
 
             {% else %}
-                {% if is_faculty %}
+                {% if is_faculty and not is_admin %}
                     <p class="text-danger small mt-3 fw-bold">No files uploaded yet</p>
                 {% else %}
                     <p class="text-muted small mb-2">No files uploaded yet</p>
@@ -89,7 +127,7 @@
                         <input type="hidden" name="action" value="upload">
                         <input type="hidden" name="doc_type_id" value="{{ item.type.id }}">
                         <input type="file" name="file" class="form-control form-control-sm mb-2" required>
-                        <button type="submit" class="btn btn-primary btn-sm w-100">Upload</button>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Upload Document</button>
                     </form>
                 {% endif %}
             {% endif %}

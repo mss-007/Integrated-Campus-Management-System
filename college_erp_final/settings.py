@@ -146,3 +146,8 @@ LOGIN_REDIRECT_URL = 'admin_dashboard'
 
 # Where to go after logging out
 LOGOUT_REDIRECT_URL = 'login'
+
+AUTHENTICATION_BACKENDS = [
+    'core.backends.CaseInsensitiveModelBackend', # ⚠️ CHANGE 'core' to your actual app folder name if it is different!
+    'django.contrib.auth.backends.ModelBackend',
+]
