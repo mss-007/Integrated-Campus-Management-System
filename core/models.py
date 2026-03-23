@@ -96,12 +96,6 @@ class StudentDocument(models.Model):
     def __str__(self):
         return f"{self.student.first_name} {self.student.last_name} - {self.document_type.name}"
 
-    class Meta:
-        unique_together = ('student', 'document_type')
-
-    def __str__(self):
-        return f"{self.student.first_name} {self.student.last_name} - {self.document_type.name}"
-
 # Add these two imports at the top of your models.py file if they aren't there already
 from django.db.models.signals import post_delete
 from django.dispatch import receiver

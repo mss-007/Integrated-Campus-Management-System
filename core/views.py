@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, update_session_auth_hash
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models import Count, Q
 from openpyxl import Workbook
 import random
-from django.contrib.auth import logout
 from .models import Student, Faculty, AppField, StudentCustomData, FacultyCustomData, DocumentType, StudentDocument
 
 def ensure_static_fields():
@@ -60,7 +59,6 @@ def advanced_settings(request):
         'doc_types': DocumentType.objects.all()
     })
 
-from django.contrib.auth import login # Make sure this is imported at the top!
 
 def login_view(request):
     if request.method == "POST":
@@ -315,23 +313,9 @@ def student_detail(request, id):
             val = getattr(student, f.name)
             if f.name in ['hosteller', 'physically_challenged']: val = "Yes" if val is True else ("No" if val is False else val)
             fields.append({'label': labels[f.name], 'value': val})
-            
-    return render(request, 'student_detail.html', {'student': student, 'fields': fields, 'is_admin': is_admin, 'is_faculty': (is_faculty or is_non_teaching)})
 
-@login_required
-def student_full_details(request, id):
-    student = get_object_or_404(Student, id=id)
-    is_admin = request.user.is_superuser or request.user.groups.filter(name="Admin").exists()
-    is_non_teaching = hasattr(request.user, 'faculty') and request.user.faculty.staff_type.lower() == 'non_teaching'
-    is_self = hasattr(request.user, 'student') and request.user.student == student
-    is_faculty = hasattr(request.user, 'faculty') and request.user.faculty.department.lower() == student.department.lower()
-    
-    if not (is_admin or is_self or is_faculty or is_non_teaching): return HttpResponseForbidden()
-
-    ensure_static_fields()
-    labels, _ = get_app_fields('student')
     extra_data = StudentCustomData.objects.filter(student=student)
-    return render(request, 'student_full_details.html', {'student': student, 'labels': labels, 'extra_data': extra_data, 'is_faculty': (is_faculty or is_non_teaching), 'is_admin': is_admin})
+    return render(request, 'student_detail.html', {'student': student, 'fields': fields, 'extra_data': extra_data, 'is_admin': is_admin, 'is_faculty': (is_faculty or is_non_teaching)})
 
 @login_required
 def student_list(request):
@@ -379,7 +363,6 @@ def delete_student(request, id):
     messages.success(request, "Student and login account deleted successfully!")
     return redirect('student_list')
 
-from django.db.models import Q # Make sure you have this import at the top!
 
 @login_required
 def faculty_list(request):
@@ -573,12 +556,6 @@ def student_locker(request, id):
         'is_admin': is_admin,
         'is_faculty': is_faculty
     })
-
-    doc_types = DocumentType.objects.all()
-    existing_docs = {doc.document_type_id: doc for doc in StudentDocument.objects.filter(student=student)}
-    locker_items = [{'type': dt, 'document': existing_docs.get(dt.id)} for dt in doc_types]
-    
-    return render(request, 'student_locker.html', {'student': student, 'locker_items': locker_items, 'is_faculty': (is_faculty_dept or is_non_teaching), 'is_admin': (is_admin_user or is_non_teaching)})
 
 @login_required
 def export_view(request):
